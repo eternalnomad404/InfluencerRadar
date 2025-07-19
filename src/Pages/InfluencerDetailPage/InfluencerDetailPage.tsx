@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import Navigation from '../../Components/Navigation/Navigation';
+import Footer from '../../Components/Footer/Footer';
 
 const InfluencerDetailPage: React.FC = () => {
   const [activeTab, setActiveTab] = useState('overview');
@@ -443,8 +444,11 @@ const InfluencerDetailPage: React.FC = () => {
           </div>
         )}
       </div>
+      
     </div>
+    
   );
+ 
 };
 
 export default InfluencerDetailPage;
