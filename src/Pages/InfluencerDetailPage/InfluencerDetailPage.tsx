@@ -1,74 +1,32 @@
 // The exported code uses Tailwind CSS. Install Tailwind CSS in your dev environment to ensure all styles work.
 
 import React, { useState } from 'react';
+import { useParams } from 'react-router-dom';
 import Navigation from '../../Components/Navigation/Navigation';
 import Footer from '../../Components/Footer/Footer';
 
+
 const InfluencerDetailPage: React.FC = () => {
+  const { channelId, category } = useParams<{ channelId: string; category: string }>();
   const [activeTab, setActiveTab] = useState('overview');
   const [selectedPlatform, setSelectedPlatform] = useState('all');
   const [timeRange, setTimeRange] = useState('30');
 
+  // TODO: Fetch influencer data and recent YouTube videos for the given channelId and category (e.g., 'smartphone')
+  // For now, use placeholder influencerData and recentPosts
   const influencerData = {
-    name: 'Emma Rodriguez',
-    handle: '@emmalifestyle',
-    profileImage: 'https://readdy.ai/api/search-image?query=professional%20female%20lifestyle%20influencer%20portrait%20with%20natural%20lighting%20clean%20white%20background%20modern%20aesthetic%20high%20quality%20photography&width=120&height=120&seq=profile001&orientation=squarish',
-    niche: 'Lifestyle & Wellness',
+    name: 'Smartphone Influencer',
+    handle: '@smartphoneguru',
+    profileImage: 'https://readdy.ai/api/search-image?query=professional%20tech%20influencer%20portrait%20with%20smartphone%20modern%20office%20background&width=120&height=120',
+    niche: 'Smartphones & Gadgets',
     platforms: {
-      instagram: { followers: '2.4M', handle: '@emmalifestyle' },
-      youtube: { followers: '890K', handle: 'EmmaLifestyle' },
-      linkedin: { followers: '45K', handle: 'emma-rodriguez' }
+      youtube: { followers: '1.2M', handle: 'SmartphoneGuru' }
     },
-    engagementRate: 4.8,
-    totalFollowers: '3.3M'
+    engagementRate: 5.1,
+    totalFollowers: '1.2M'
   };
 
-  const recentPosts = [
-    {
-      id: 1,
-      platform: 'instagram',
-      type: 'reel',
-      thumbnail: 'https://readdy.ai/api/search-image?query=lifestyle%20wellness%20morning%20routine%20content%20creator%20filming%20with%20natural%20lighting%20clean%20aesthetic%20modern%20apartment%20background&width=300&height=400&seq=post001&orientation=portrait',
-      caption: 'Morning routine that changed my life ✨ Starting with gratitude and movement...',
-      likes: 45200,
-      comments: 892,
-      views: 234000,
-      date: '2 hours ago'
-    },
-    {
-      id: 2,
-      platform: 'youtube',
-      type: 'video',
-      thumbnail: 'https://readdy.ai/api/search-image?query=healthy%20meal%20prep%20kitchen%20setup%20with%20fresh%20ingredients%20natural%20lighting%20clean%20modern%20kitchen%20background%20lifestyle%20content&width=300&height=200&seq=post002&orientation=landscape',
-      caption: 'Weekly Meal Prep That Actually Works | Healthy & Budget-Friendly',
-      likes: 12400,
-      comments: 456,
-      views: 89000,
-      date: '1 day ago'
-    },
-    {
-      id: 3,
-      platform: 'instagram',
-      type: 'post',
-      thumbnail: 'https://readdy.ai/api/search-image?query=wellness%20skincare%20routine%20products%20flat%20lay%20with%20natural%20lighting%20clean%20white%20background%20minimalist%20aesthetic&width=300&height=300&seq=post003&orientation=squarish',
-      caption: 'My simplified skincare routine for busy mornings 🌅 Less is more approach...',
-      likes: 28900,
-      comments: 567,
-      views: null,
-      date: '2 days ago'
-    },
-    {
-      id: 4,
-      platform: 'linkedin',
-      type: 'article',
-      thumbnail: 'https://readdy.ai/api/search-image?query=professional%20workspace%20setup%20with%20laptop%20and%20notebook%20clean%20modern%20office%20background%20natural%20lighting%20business%20content%20creator&width=300&height=200&seq=post004&orientation=landscape',
-      caption: 'Building a Personal Brand in the Digital Age: 5 Key Strategies',
-      likes: 892,
-      comments: 67,
-      views: 5600,
-      date: '3 days ago'
-    }
-  ];
+  const recentPosts: any[] = []; // Will be filled by YouTube API fetch in the next step
 
   const brandCollaborations = [
     { name: 'Nike', logo: 'fas fa-check-circle', type: 'Sponsorship', campaign: 'Active Lifestyle' },
@@ -102,8 +60,8 @@ const InfluencerDetailPage: React.FC = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between">
             <div className="flex items-start space-x-6">
-              <img 
-                src={influencerData.profileImage} 
+              <img
+                src={influencerData.profileImage}
                 alt={influencerData.name}
                 className="w-24 h-24 rounded-full object-cover"
               />
@@ -111,7 +69,7 @@ const InfluencerDetailPage: React.FC = () => {
                 <h2 className="text-3xl font-bold text-gray-900">{influencerData.name}</h2>
                 <p className="text-lg text-gray-600 mt-1">{influencerData.handle}</p>
                 <p className="text-sm text-gray-500 mt-2">{influencerData.niche}</p>
-                
+
                 {/* Platform Badges */}
                 <div className="flex items-center space-x-4 mt-4">
                   <div className="flex items-center space-x-2 px-3 py-1 bg-pink-50 rounded-full cursor-pointer">
@@ -260,7 +218,7 @@ const InfluencerDetailPage: React.FC = () => {
               <div className="bg-white rounded-lg shadow-sm border p-6">
                 <div className="flex items-center justify-between mb-4">
                   <h3 className="text-lg font-semibold text-gray-900">Engagement Trends</h3>
-                  <select 
+                  <select
                     value={timeRange}
                     onChange={(e) => setTimeRange(e.target.value)}
                     className="text-sm border border-gray-300 rounded px-3 py-1 cursor-pointer"
@@ -325,7 +283,7 @@ const InfluencerDetailPage: React.FC = () => {
               <div className="flex items-center space-x-4">
                 <div className="flex items-center space-x-2">
                   <span className="text-sm font-medium text-gray-700">Platform:</span>
-                  <select 
+                  <select
                     value={selectedPlatform}
                     onChange={(e) => setSelectedPlatform(e.target.value)}
                     className="text-sm border border-gray-300 rounded px-3 py-1 cursor-pointer"
@@ -347,8 +305,8 @@ const InfluencerDetailPage: React.FC = () => {
               {recentPosts.map((post) => (
                 <div key={post.id} className="bg-white rounded-lg shadow-sm border overflow-hidden hover:shadow-md transition-shadow cursor-pointer">
                   <div className="relative">
-                    <img 
-                      src={post.thumbnail} 
+                    <img
+                      src={post.thumbnail}
                       alt="Post thumbnail"
                       className="w-full h-48 object-cover object-top"
                     />
@@ -446,9 +404,9 @@ const InfluencerDetailPage: React.FC = () => {
       </div>
       <Footer/>
     </div>
-    
+
   );
- 
+
 };
 
 export default InfluencerDetailPage;

@@ -12,9 +12,10 @@ const App: React.FC = () => {
       <div className="min-h-screen bg-gray-100 text-gray-800">
         <Routes>
           <Route path="/" element={<HomePage />} />
-             <Route path="/influencerPage" element={<InfluencerPage />} />
-             
-             <Route path="/influencerDetailPage" element={<InfluencerDetailPage />} />
+          <Route path="/influencerPage" element={<InfluencerPage />} />
+          {/* Dynamic route for influencer detail: accepts channelId and category */}
+          <Route path="/influencerDetailPage/:channelId/:category" element={<InfluencerDetailPage />} />
+          
         </Routes>
       </div>
     </Router>
