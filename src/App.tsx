@@ -4,6 +4,7 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 
 import HomePage from './Pages/HomePage/HomePage';
 import InfluencerPage from './Pages/InfluencersPage/InfluencerPage';
+import InfluencerDetailPage from './Pages/InfluencerDetailPage/InfluencerDetailPage';
 
 const App: React.FC = () => {
   return (
@@ -12,6 +13,8 @@ const App: React.FC = () => {
         <Routes>
           <Route path="/" element={<HomePage />} />
              <Route path="/influencerPage" element={<InfluencerPage />} />
+             
+             <Route path="/influencerDetailPage" element={<InfluencerDetailPage />} />
         </Routes>
       </div>
     </Router>

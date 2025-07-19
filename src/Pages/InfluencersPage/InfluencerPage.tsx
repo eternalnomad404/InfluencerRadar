@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import Navigation from '../../Components/Navigation/Navigation';
 import Pagination from './Components/Pagination';
+import { Link } from 'react-router-dom';
 
 const InfluencerPage: React.FC = () => {
   const [selectedPlatforms, setSelectedPlatforms] = useState<string[]>([]);
@@ -317,9 +318,12 @@ const InfluencerPage: React.FC = () => {
                         </div>
                       </div>
 
-                      <button className="w-full bg-blue-600 text-white py-2 !rounded-button text-sm font-medium hover:bg-blue-700 cursor-pointer whitespace-nowrap">
-                        View Dashboard
-                      </button>
+                  <Link to="/influencerDetailPage" className="w-full">
+  <button className="w-full bg-blue-600 text-white py-2 !rounded-button text-sm font-medium hover:bg-blue-700 cursor-pointer whitespace-nowrap">
+    View Dashboard
+  </button>
+</Link>
+
                     </div>
                   ))}
                 </div>
