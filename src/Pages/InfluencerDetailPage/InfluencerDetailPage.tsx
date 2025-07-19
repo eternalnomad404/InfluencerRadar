@@ -444,7 +444,7 @@ const InfluencerDetailPage: React.FC = () => {
           </div>
         )}
       </div>
-      
+      <Footer/>
     </div>
     
   );
