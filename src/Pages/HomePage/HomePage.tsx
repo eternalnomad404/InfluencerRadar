@@ -11,6 +11,17 @@ import Footer from '../../Components/Footer/Footer';
 const HomePage: React.FC = () => {
   const navigate = useNavigate();
 
+  // Handler for navigating to influencer detail page
+  const handleInfluencerClick = (channelId: string) => {
+    try {
+      navigate(`/influencer-detail/${channelId}/technology`);
+    } catch (error) {
+      console.error('Navigation error:', error);
+      // Fallback to influencer page if specific channel fails
+      navigate('/influencerPage');
+    }
+  };
+
   return (
     <div className="min-h-screen bg-white">
       {/* Navigation */}
@@ -57,11 +68,9 @@ const HomePage: React.FC = () => {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {/* Marques Brownlee */}
             <div className="bg-white border border-gray-200 rounded-2xl p-6 hover:shadow-lg transition-shadow duration-300 cursor-pointer">
-              <img 
-                src="https://readdy.ai/api/search-image?query=Marques%20Brownlee%20MKBHD%20portrait%20professional%20tech%20reviewer%20clean%20background&width=200&height=200&seq=mkbhd-001&orientation=squarish"
-                alt="Marques Brownlee"
-                className="w-16 h-16 rounded-full mx-auto mb-4 object-cover object-center"
-              />
+              <div className="w-16 h-16 rounded-full mx-auto mb-4 bg-gradient-to-br from-red-500 to-red-600 flex items-center justify-center">
+                <span className="text-white font-bold text-lg">MB</span>
+              </div>
               <h3 className="text-lg font-semibold text-gray-900 text-center mb-2">Marques Brownlee</h3>
               <p className="text-sm text-gray-600 text-center mb-4">Tech Reviews & Cars</p>
               <div className="flex justify-center space-x-2 mb-4">
@@ -74,7 +83,7 @@ const HomePage: React.FC = () => {
                 <span className="px-2 py-1 bg-green-100 text-green-700 text-xs rounded-full">6.2% engagement</span>
               </div>
               <button 
-                onClick={() => navigate('/influencer-detail/UCBJycsmduvYEL83R_U4JriQ/technology')}
+                onClick={() => handleInfluencerClick('UCBJycsmduvYEL83R_U4JriQ')}
                 className="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 text-sm font-medium !rounded-button whitespace-nowrap cursor-pointer transition-colors"
               >
                 Track Dashboard
@@ -83,11 +92,9 @@ const HomePage: React.FC = () => {
 
             {/* Unbox Therapy */}
             <div className="bg-white border border-gray-200 rounded-2xl p-6 hover:shadow-lg transition-shadow duration-300 cursor-pointer">
-              <img 
-                src="https://readdy.ai/api/search-image?query=Lewis%20Hilsenteger%20Unbox%20Therapy%20tech%20unboxing%20portrait%20professional&width=200&height=200&seq=unbox-therapy-001&orientation=squarish"
-                alt="Unbox Therapy"
-                className="w-16 h-16 rounded-full mx-auto mb-4 object-cover object-center"
-              />
+              <div className="w-16 h-16 rounded-full mx-auto mb-4 bg-gradient-to-br from-orange-500 to-orange-600 flex items-center justify-center">
+                <span className="text-white font-bold text-lg">UT</span>
+              </div>
               <h3 className="text-lg font-semibold text-gray-900 text-center mb-2">Unbox Therapy</h3>
               <p className="text-sm text-gray-600 text-center mb-4">Gadget Unboxing & Reviews</p>
               <div className="flex justify-center space-x-2 mb-4">
@@ -99,18 +106,19 @@ const HomePage: React.FC = () => {
                 <span className="text-sm text-gray-500">18.4M subscribers</span>
                 <span className="px-2 py-1 bg-yellow-100 text-yellow-700 text-xs rounded-full">4.8% engagement</span>
               </div>
-              <button className="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 text-sm font-medium !rounded-button whitespace-nowrap cursor-pointer">
+              <button 
+                onClick={() => handleInfluencerClick('UCsTcErHg8oDvUnTzoqsYeNw')}
+                className="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 text-sm font-medium !rounded-button whitespace-nowrap cursor-pointer transition-colors"
+              >
                 Track Dashboard
               </button>
             </div>
 
             {/* Linus Tech Tips */}
             <div className="bg-white border border-gray-200 rounded-2xl p-6 hover:shadow-lg transition-shadow duration-300 cursor-pointer">
-              <img 
-                src="https://readdy.ai/api/search-image?query=Linus%20Sebastian%20Linus%20Tech%20Tips%20portrait%20professional%20tech%20content%20creator&width=200&height=200&seq=ltt-001&orientation=squarish"
-                alt="Linus Tech Tips"
-                className="w-16 h-16 rounded-full mx-auto mb-4 object-cover object-center"
-              />
+              <div className="w-16 h-16 rounded-full mx-auto mb-4 bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center">
+                <span className="text-white font-bold text-lg">LTT</span>
+              </div>
               <h3 className="text-lg font-semibold text-gray-900 text-center mb-2">Linus Tech Tips</h3>
               <p className="text-sm text-gray-600 text-center mb-4">PC Building & Tech</p>
               <div className="flex justify-center space-x-2 mb-4">
@@ -122,18 +130,19 @@ const HomePage: React.FC = () => {
                 <span className="text-sm text-gray-500">15.6M subscribers</span>
                 <span className="px-2 py-1 bg-green-100 text-green-700 text-xs rounded-full">7.1% engagement</span>
               </div>
-              <button className="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 text-sm font-medium !rounded-button whitespace-nowrap cursor-pointer">
+              <button 
+                onClick={() => handleInfluencerClick('UCXuqSBlHAE6Xw-yeJA0Tunw')}
+                className="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 text-sm font-medium !rounded-button whitespace-nowrap cursor-pointer transition-colors"
+              >
                 Track Dashboard
               </button>
             </div>
 
             {/* MrWhosetheBoss */}
             <div className="bg-white border border-gray-200 rounded-2xl p-6 hover:shadow-lg transition-shadow duration-300 cursor-pointer">
-              <img 
-                src="https://readdy.ai/api/search-image?query=Arun%20Maini%20Mrwhosetheboss%20tech%20reviewer%20portrait%20professional%20smartphone%20expert&width=200&height=200&seq=mrwhosetheboss-001&orientation=squarish"
-                alt="MrWhosetheBoss"
-                className="w-16 h-16 rounded-full mx-auto mb-4 object-cover object-center"
-              />
+              <div className="w-16 h-16 rounded-full mx-auto mb-4 bg-gradient-to-br from-purple-500 to-purple-600 flex items-center justify-center">
+                <span className="text-white font-bold text-lg">MWB</span>
+              </div>
               <h3 className="text-lg font-semibold text-gray-900 text-center mb-2">Mrwhosetheboss</h3>
               <p className="text-sm text-gray-600 text-center mb-4">Smartphone & Tech Reviews</p>
               <div className="flex justify-center space-x-2 mb-4">
@@ -145,7 +154,10 @@ const HomePage: React.FC = () => {
                 <span className="text-sm text-gray-500">14.8M subscribers</span>
                 <span className="px-2 py-1 bg-green-100 text-green-700 text-xs rounded-full">8.3% engagement</span>
               </div>
-              <button className="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 text-sm font-medium !rounded-button whitespace-nowrap cursor-pointer">
+              <button 
+                onClick={() => handleInfluencerClick('UC6QYFutt9cluQ3uSM8XzKcQ')}
+                className="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 text-sm font-medium !rounded-button whitespace-nowrap cursor-pointer transition-colors"
+              >
                 Track Dashboard
               </button>
             </div>
@@ -155,11 +167,9 @@ const HomePage: React.FC = () => {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mt-8">
             {/* Austin Evans */}
             <div className="bg-white border border-gray-200 rounded-2xl p-6 hover:shadow-lg transition-shadow duration-300 cursor-pointer">
-              <img 
-                src="https://readdy.ai/api/search-image?query=Austin%20Evans%20tech%20reviewer%20portrait%20professional%20budget%20tech%20content%20creator&width=200&height=200&seq=austin-evans-001&orientation=squarish"
-                alt="Austin Evans"
-                className="w-16 h-16 rounded-full mx-auto mb-4 object-cover object-center"
-              />
+              <div className="w-16 h-16 rounded-full mx-auto mb-4 bg-gradient-to-br from-green-500 to-green-600 flex items-center justify-center">
+                <span className="text-white font-bold text-lg">AE</span>
+              </div>
               <h3 className="text-lg font-semibold text-gray-900 text-center mb-2">Austin Evans</h3>
               <p className="text-sm text-gray-600 text-center mb-4">Budget Tech & Gaming</p>
               <div className="flex justify-center space-x-2 mb-4">
@@ -171,18 +181,19 @@ const HomePage: React.FC = () => {
                 <span className="text-sm text-gray-500">5.42M subscribers</span>
                 <span className="px-2 py-1 bg-yellow-100 text-yellow-700 text-xs rounded-full">5.7% engagement</span>
               </div>
-              <button className="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 text-sm font-medium !rounded-button whitespace-nowrap cursor-pointer">
+              <button 
+                onClick={() => handleInfluencerClick('UCXGgrKt94gR6lmN4aN3mYTg')}
+                className="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 text-sm font-medium !rounded-button whitespace-nowrap cursor-pointer transition-colors"
+              >
                 Track Dashboard
               </button>
             </div>
 
             {/* JerryRigEverything */}
             <div className="bg-white border border-gray-200 rounded-2xl p-6 hover:shadow-lg transition-shadow duration-300 cursor-pointer">
-              <img 
-                src="https://readdy.ai/api/search-image?query=Zack%20Nelson%20JerryRigEverything%20durability%20tester%20tech%20portrait%20professional&width=200&height=200&seq=jerryrig-001&orientation=squarish"
-                alt="JerryRigEverything"
-                className="w-16 h-16 rounded-full mx-auto mb-4 object-cover object-center"
-              />
+              <div className="w-16 h-16 rounded-full mx-auto mb-4 bg-gradient-to-br from-gray-600 to-gray-700 flex items-center justify-center">
+                <span className="text-white font-bold text-lg">JRE</span>
+              </div>
               <h3 className="text-lg font-semibold text-gray-900 text-center mb-2">JerryRigEverything</h3>
               <p className="text-sm text-gray-600 text-center mb-4">Durability Testing</p>
               <div className="flex justify-center space-x-2 mb-4">
@@ -194,18 +205,19 @@ const HomePage: React.FC = () => {
                 <span className="text-sm text-gray-500">7.88M subscribers</span>
                 <span className="px-2 py-1 bg-green-100 text-green-700 text-xs rounded-full">9.2% engagement</span>
               </div>
-              <button className="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 text-sm font-medium !rounded-button whitespace-nowrap cursor-pointer">
+              <button 
+                onClick={() => handleInfluencerClick('UCWFKCr40YwOZQx8FHU_ZqqQ')}
+                className="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 text-sm font-medium !rounded-button whitespace-nowrap cursor-pointer transition-colors"
+              >
                 Track Dashboard
               </button>
             </div>
 
             {/* Technical Guruji */}
             <div className="bg-white border border-gray-200 rounded-2xl p-6 hover:shadow-lg transition-shadow duration-300 cursor-pointer">
-              <img 
-                src="https://readdy.ai/api/search-image?query=Gaurav%20Chaudhary%20Technical%20Guruji%20Indian%20tech%20YouTuber%20portrait%20professional&width=200&height=200&seq=technical-guruji-001&orientation=squarish"
-                alt="Technical Guruji"
-                className="w-16 h-16 rounded-full mx-auto mb-4 object-cover object-center"
-              />
+              <div className="w-16 h-16 rounded-full mx-auto mb-4 bg-gradient-to-br from-yellow-500 to-yellow-600 flex items-center justify-center">
+                <span className="text-white font-bold text-lg">TG</span>
+              </div>
               <h3 className="text-lg font-semibold text-gray-900 text-center mb-2">Technical Guruji</h3>
               <p className="text-sm text-gray-600 text-center mb-4">Hindi Tech Content</p>
               <div className="flex justify-center space-x-2 mb-4">
@@ -217,18 +229,19 @@ const HomePage: React.FC = () => {
                 <span className="text-sm text-gray-500">23.1M subscribers</span>
                 <span className="px-2 py-1 bg-green-100 text-green-700 text-xs rounded-full">6.8% engagement</span>
               </div>
-              <button className="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 text-sm font-medium !rounded-button whitespace-nowrap cursor-pointer">
+              <button 
+                onClick={() => handleInfluencerClick('UCmYTgAKDyZR-MG2-dJ8M8lA')}
+                className="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 text-sm font-medium !rounded-button whitespace-nowrap cursor-pointer transition-colors"
+              >
                 Track Dashboard
               </button>
             </div>
 
             {/* Tech Burner */}
             <div className="bg-white border border-gray-200 rounded-2xl p-6 hover:shadow-lg transition-shadow duration-300 cursor-pointer">
-              <img 
-                src="https://readdy.ai/api/search-image?query=Tech%20Burner%20Shlok%20Srivastava%20Indian%20tech%20YouTuber%20portrait%20professional&width=200&height=200&seq=tech-burner-001&orientation=squarish"
-                alt="Tech Burner"
-                className="w-16 h-16 rounded-full mx-auto mb-4 object-cover object-center"
-              />
+              <div className="w-16 h-16 rounded-full mx-auto mb-4 bg-gradient-to-br from-indigo-500 to-indigo-600 flex items-center justify-center">
+                <span className="text-white font-bold text-lg">TB</span>
+              </div>
               <h3 className="text-lg font-semibold text-gray-900 text-center mb-2">Tech Burner</h3>
               <p className="text-sm text-gray-600 text-center mb-4">Indian Tech Reviews</p>
               <div className="flex justify-center space-x-2 mb-4">
@@ -240,7 +253,10 @@ const HomePage: React.FC = () => {
                 <span className="text-sm text-gray-500">12.2M subscribers</span>
                 <span className="px-2 py-1 bg-yellow-100 text-yellow-700 text-xs rounded-full">4.9% engagement</span>
               </div>
-              <button className="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 text-sm font-medium !rounded-button whitespace-nowrap cursor-pointer">
+              <button 
+                onClick={() => handleInfluencerClick('UCe24XAEotUKjSTQ5EPVgieA')}
+                className="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 text-sm font-medium !rounded-button whitespace-nowrap cursor-pointer transition-colors"
+              >
                 Track Dashboard
               </button>
             </div>

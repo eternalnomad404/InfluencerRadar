@@ -457,7 +457,7 @@ const InfluencerPage: React.FC = () => {
                         )}
                       </div>
 
-                  <Link to={`/influencerDetailPage/${influencer.id}/technology`} className="w-full">
+                  <Link to={`/influencer-detail/${influencer.id}/technology`} className="w-full">
   <button className="w-full bg-blue-600 text-white py-2 !rounded-button text-sm font-medium hover:bg-blue-700 cursor-pointer whitespace-nowrap">
     View Dashboard
   </button>

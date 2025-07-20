@@ -14,7 +14,7 @@ const App: React.FC = () => {
           <Route path="/" element={<HomePage />} />
           <Route path="/influencerPage" element={<InfluencerPage />} />
           {/* Dynamic route for influencer detail: accepts channelId and category */}
-          <Route path="/influencerDetailPage/:channelId/:category" element={<InfluencerDetailPage />} />
+          <Route path="/influencer-detail/:channelId/:category" element={<InfluencerDetailPage />} />
           
         </Routes>
       </div>
