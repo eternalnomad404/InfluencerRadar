@@ -28,6 +28,49 @@ const InfluencerPage: React.FC = () => {
 
   const YOUTUBE_API_KEY = 'AIzaSyCZ1y5wlvF9Vof4eCWxBFwXTsfRGvB_K9U';
 
+  // Helper function to convert country codes to full country names
+  const getCountryName = (countryCode: string): string => {
+    const countryMap: { [key: string]: string } = {
+      'US': 'United States',
+      'CA': 'Canada', 
+      'GB': 'United Kingdom',
+      'UK': 'United Kingdom',
+      'IN': 'India',
+      'AU': 'Australia',
+      'DE': 'Germany',
+      'FR': 'France',
+      'JP': 'Japan',
+      'KR': 'South Korea',
+      'SG': 'Singapore',
+      'NL': 'Netherlands',
+      'SE': 'Sweden',
+      'NO': 'Norway',
+      'DK': 'Denmark',
+      'FI': 'Finland',
+      'CH': 'Switzerland',
+      'AT': 'Austria',
+      'BE': 'Belgium',
+      'IE': 'Ireland',
+      'NZ': 'New Zealand',
+      'BR': 'Brazil',
+      'MX': 'Mexico',
+      'ES': 'Spain',
+      'IT': 'Italy',
+      'PT': 'Portugal',
+      'RU': 'Russia',
+      'CN': 'China',
+      'TW': 'Taiwan',
+      'HK': 'Hong Kong',
+      'MY': 'Malaysia',
+      'TH': 'Thailand',
+      'PH': 'Philippines',
+      'ID': 'Indonesia',
+      'VN': 'Vietnam'
+    };
+    
+    return countryMap[countryCode] || countryCode || 'Not known';
+  };
+
   const formatSubscriberCount = (count: string): string => {
     const num = parseInt(count);
     if (num >= 1000000) {
@@ -127,7 +170,7 @@ const InfluencerPage: React.FC = () => {
           followers: formatSubscriberCount(channel.statistics.subscriberCount || '0'),
           category: 'Technology',
           engagement: '', // Keep blank as requested
-          country: channel.snippet.country || '' // Extract country if available
+          country: getCountryName(channel.snippet.country) // Convert country code to full name
         })) || [];
 
         // Sort by subscriber count (descending)
@@ -443,6 +486,12 @@ const InfluencerPage: React.FC = () => {
                         <span className="bg-blue-50 text-blue-700 px-3 py-1 rounded-full text-xs font-medium">
                           {influencer.category}
                         </span>
+                      </div>
+
+                      <div className="text-center mb-4">
+                        <div className="text-xs text-gray-500">
+                          📍 {influencer.country || 'Not known'}
+                        </div>
                       </div>
 
                       <div className="text-center mb-4">

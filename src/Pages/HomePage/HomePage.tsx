@@ -20,6 +20,7 @@ interface CachedInfluencer {
   };
   engagementRate: number;
   totalFollowers: string;
+  country?: string;
 }
 
 const HomePage: React.FC = () => {
@@ -90,7 +91,7 @@ const HomePage: React.FC = () => {
             <p className="text-xl text-gray-600 max-w-3xl mx-auto mb-8">
               Explore top tech influencers with real-time analytics, engagement metrics, and comprehensive performance tracking across multiple platforms
             </p>
-            
+
             {/* Platform Statistics */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-6 max-w-4xl mx-auto mb-8">
               <div className="text-center">
@@ -116,8 +117,8 @@ const HomePage: React.FC = () => {
             {/* Marques Brownlee */}
             <div className="bg-white border border-gray-200 rounded-2xl p-6 hover:shadow-lg transition-shadow duration-300 cursor-pointer">
               {getInfluencerData('UCBJycsmduvYEL83R_U4JriQ')?.profileImage ? (
-                <img 
-                  src={getInfluencerData('UCBJycsmduvYEL83R_U4JriQ')?.profileImage} 
+                <img
+                  src={getInfluencerData('UCBJycsmduvYEL83R_U4JriQ')?.profileImage}
                   alt="Marques Brownlee"
                   className="w-16 h-16 rounded-full mx-auto mb-4 object-cover"
                 />
@@ -127,7 +128,10 @@ const HomePage: React.FC = () => {
                 </div>
               )}
               <h3 className="text-lg font-semibold text-gray-900 text-center mb-2">Marques Brownlee</h3>
-              <p className="text-sm text-gray-600 text-center mb-4">Tech Reviews & Cars</p>
+              <p className="text-sm text-gray-600 text-center mb-2">Tech Reviews & Cars</p>
+              <p className="text-xs text-gray-500 text-center mb-4">
+                📍 {getInfluencerData('UCBJycsmduvYEL83R_U4JriQ')?.country || 'Not known'}
+              </p>
               <div className="flex justify-center space-x-2 mb-4">
                 <i className="fab fa-youtube text-red-600"></i>
                 <i className="fab fa-twitter text-blue-400"></i>
@@ -138,13 +142,13 @@ const HomePage: React.FC = () => {
                   {getInfluencerData('UCBJycsmduvYEL83R_U4JriQ')?.platforms?.youtube?.followers || '18.1M subscribers'}
                 </span>
                 <span className="px-2 py-1 bg-green-100 text-green-700 text-xs rounded-full">
-                  {getInfluencerData('UCBJycsmduvYEL83R_U4JriQ')?.engagementRate ? 
-                    `${getInfluencerData('UCBJycsmduvYEL83R_U4JriQ')?.engagementRate.toFixed(1)}% engagement` : 
+                  {getInfluencerData('UCBJycsmduvYEL83R_U4JriQ')?.engagementRate ?
+                    `${getInfluencerData('UCBJycsmduvYEL83R_U4JriQ')?.engagementRate.toFixed(1)}% engagement` :
                     '6.2% engagement'
                   }
                 </span>
               </div>
-              <button 
+              <button
                 onClick={() => handleInfluencerClick('UCBJycsmduvYEL83R_U4JriQ')}
                 className="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 text-sm font-medium !rounded-button whitespace-nowrap cursor-pointer transition-colors"
               >
@@ -155,8 +159,8 @@ const HomePage: React.FC = () => {
             {/* Unbox Therapy */}
             <div className="bg-white border border-gray-200 rounded-2xl p-6 hover:shadow-lg transition-shadow duration-300 cursor-pointer">
               {getInfluencerData('UCsTcErHg8oDvUnTzoqsYeNw')?.profileImage ? (
-                <img 
-                  src={getInfluencerData('UCsTcErHg8oDvUnTzoqsYeNw')?.profileImage} 
+                <img
+                  src={getInfluencerData('UCsTcErHg8oDvUnTzoqsYeNw')?.profileImage}
                   alt="Unbox Therapy"
                   className="w-16 h-16 rounded-full mx-auto mb-4 object-cover"
                 />
@@ -166,7 +170,10 @@ const HomePage: React.FC = () => {
                 </div>
               )}
               <h3 className="text-lg font-semibold text-gray-900 text-center mb-2">Unbox Therapy</h3>
-              <p className="text-sm text-gray-600 text-center mb-4">Gadget Unboxing & Reviews</p>
+              <p className="text-sm text-gray-600 text-center mb-2">Gadget Unboxing & Reviews</p>
+              <p className="text-xs text-gray-500 text-center mb-4">
+                📍 {getInfluencerData('UCsTcErHg8oDvUnTzoqsYeNw')?.country || 'Not known'}
+              </p>
               <div className="flex justify-center space-x-2 mb-4">
                 <i className="fab fa-youtube text-red-600"></i>
                 <i className="fab fa-instagram text-pink-600"></i>
@@ -177,13 +184,13 @@ const HomePage: React.FC = () => {
                   {getInfluencerData('UCsTcErHg8oDvUnTzoqsYeNw')?.platforms?.youtube?.followers || '18.4M subscribers'}
                 </span>
                 <span className="px-2 py-1 bg-yellow-100 text-yellow-700 text-xs rounded-full">
-                  {getInfluencerData('UCsTcErHg8oDvUnTzoqsYeNw')?.engagementRate ? 
-                    `${getInfluencerData('UCsTcErHg8oDvUnTzoqsYeNw')?.engagementRate.toFixed(1)}% engagement` : 
+                  {getInfluencerData('UCsTcErHg8oDvUnTzoqsYeNw')?.engagementRate ?
+                    `${getInfluencerData('UCsTcErHg8oDvUnTzoqsYeNw')?.engagementRate.toFixed(1)}% engagement` :
                     '4.8% engagement'
                   }
                 </span>
               </div>
-              <button 
+              <button
                 onClick={() => handleInfluencerClick('UCsTcErHg8oDvUnTzoqsYeNw')}
                 className="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 text-sm font-medium !rounded-button whitespace-nowrap cursor-pointer transition-colors"
               >
@@ -194,8 +201,8 @@ const HomePage: React.FC = () => {
             {/* Linus Tech Tips */}
             <div className="bg-white border border-gray-200 rounded-2xl p-6 hover:shadow-lg transition-shadow duration-300 cursor-pointer">
               {getInfluencerData('UCXuqSBlHAE6Xw-yeJA0Tunw')?.profileImage ? (
-                <img 
-                  src={getInfluencerData('UCXuqSBlHAE6Xw-yeJA0Tunw')?.profileImage} 
+                <img
+                  src={getInfluencerData('UCXuqSBlHAE6Xw-yeJA0Tunw')?.profileImage}
                   alt="Linus Tech Tips"
                   className="w-16 h-16 rounded-full mx-auto mb-4 object-cover"
                 />
@@ -205,7 +212,10 @@ const HomePage: React.FC = () => {
                 </div>
               )}
               <h3 className="text-lg font-semibold text-gray-900 text-center mb-2">Linus Tech Tips</h3>
-              <p className="text-sm text-gray-600 text-center mb-4">PC Building & Tech</p>
+              <p className="text-sm text-gray-600 text-center mb-2">PC Building & Tech</p>
+              <p className="text-xs text-gray-500 text-center mb-4">
+                📍 {getInfluencerData('UCXuqSBlHAE6Xw-yeJA0Tunw')?.country || 'Not known'}
+              </p>
               <div className="flex justify-center space-x-2 mb-4">
                 <i className="fab fa-youtube text-red-600"></i>
                 <i className="fab fa-twitter text-blue-400"></i>
@@ -216,13 +226,13 @@ const HomePage: React.FC = () => {
                   {getInfluencerData('UCXuqSBlHAE6Xw-yeJA0Tunw')?.platforms?.youtube?.followers || '15.6M subscribers'}
                 </span>
                 <span className="px-2 py-1 bg-green-100 text-green-700 text-xs rounded-full">
-                  {getInfluencerData('UCXuqSBlHAE6Xw-yeJA0Tunw')?.engagementRate ? 
-                    `${getInfluencerData('UCXuqSBlHAE6Xw-yeJA0Tunw')?.engagementRate.toFixed(1)}% engagement` : 
+                  {getInfluencerData('UCXuqSBlHAE6Xw-yeJA0Tunw')?.engagementRate ?
+                    `${getInfluencerData('UCXuqSBlHAE6Xw-yeJA0Tunw')?.engagementRate.toFixed(1)}% engagement` :
                     '7.1% engagement'
                   }
                 </span>
               </div>
-              <button 
+              <button
                 onClick={() => handleInfluencerClick('UCXuqSBlHAE6Xw-yeJA0Tunw')}
                 className="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 text-sm font-medium !rounded-button whitespace-nowrap cursor-pointer transition-colors"
               >
@@ -233,8 +243,8 @@ const HomePage: React.FC = () => {
             {/* MrWhosetheBoss */}
             <div className="bg-white border border-gray-200 rounded-2xl p-6 hover:shadow-lg transition-shadow duration-300 cursor-pointer">
               {getInfluencerData('UC6QYFutt9cluQ3uSM8XzKcQ')?.profileImage ? (
-                <img 
-                  src={getInfluencerData('UC6QYFutt9cluQ3uSM8XzKcQ')?.profileImage} 
+                <img
+                  src={getInfluencerData('UC6QYFutt9cluQ3uSM8XzKcQ')?.profileImage}
                   alt="Mrwhosetheboss"
                   className="w-16 h-16 rounded-full mx-auto mb-4 object-cover"
                 />
@@ -244,7 +254,10 @@ const HomePage: React.FC = () => {
                 </div>
               )}
               <h3 className="text-lg font-semibold text-gray-900 text-center mb-2">Mrwhosetheboss</h3>
-              <p className="text-sm text-gray-600 text-center mb-4">Smartphone & Tech Reviews</p>
+              <p className="text-sm text-gray-600 text-center mb-2">Smartphone & Tech Reviews</p>
+              <p className="text-xs text-gray-500 text-center mb-4">
+                📍 {getInfluencerData('UC6QYFutt9cluQ3uSM8XzKcQ')?.country || 'Not known'}
+              </p>
               <div className="flex justify-center space-x-2 mb-4">
                 <i className="fab fa-youtube text-red-600"></i>
                 <i className="fab fa-instagram text-pink-600"></i>
@@ -255,13 +268,13 @@ const HomePage: React.FC = () => {
                   {getInfluencerData('UC6QYFutt9cluQ3uSM8XzKcQ')?.platforms?.youtube?.followers || '14.8M subscribers'}
                 </span>
                 <span className="px-2 py-1 bg-green-100 text-green-700 text-xs rounded-full">
-                  {getInfluencerData('UC6QYFutt9cluQ3uSM8XzKcQ')?.engagementRate ? 
-                    `${getInfluencerData('UC6QYFutt9cluQ3uSM8XzKcQ')?.engagementRate.toFixed(1)}% engagement` : 
+                  {getInfluencerData('UC6QYFutt9cluQ3uSM8XzKcQ')?.engagementRate ?
+                    `${getInfluencerData('UC6QYFutt9cluQ3uSM8XzKcQ')?.engagementRate.toFixed(1)}% engagement` :
                     '8.3% engagement'
                   }
                 </span>
               </div>
-              <button 
+              <button
                 onClick={() => handleInfluencerClick('UC6QYFutt9cluQ3uSM8XzKcQ')}
                 className="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 text-sm font-medium !rounded-button whitespace-nowrap cursor-pointer transition-colors"
               >
@@ -273,14 +286,14 @@ const HomePage: React.FC = () => {
           <div className="text-center mt-12">
             <div className="mb-6">
               <p className="text-sm text-gray-600 mb-2">
-                Featuring <span className="font-semibold text-blue-600">4 top tech influencers</span> with 
+                Featuring <span className="font-semibold text-blue-600">4 top tech influencers</span> with
                 <span className="font-semibold text-green-600"> 67M+ total subscribers</span>
               </p>
               <p className="text-xs text-gray-500">
                 Real-time data • Engagement analytics • Content tracking • Performance insights
               </p>
             </div>
-            <button 
+            <button
               onClick={() => navigate('/influencerPage')}
               className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white px-8 py-3 font-medium !rounded-button whitespace-nowrap cursor-pointer shadow-lg transition-all duration-300 transform hover:scale-105"
             >
@@ -294,7 +307,7 @@ const HomePage: React.FC = () => {
       {/* Features Snapshot */}
      <FeatureSnapshot/>
 
-      
+
 
       {/* Footer */}
      <Footer/>

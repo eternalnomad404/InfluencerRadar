@@ -21,6 +21,18 @@ interface InfluencerData {
   country?: string;
 }
 
+interface VideoComment {
+  id: string;
+  videoId: string;
+  authorDisplayName: string;
+  authorProfileImageUrl: string;
+  textDisplay: string;
+  likeCount: number;
+  publishedAt: string;
+  replyCount: number;
+  parentId?: string;
+}
+
 const InfluencerDetailPage: React.FC = () => {
   const { channelId, category } = useParams<{ channelId: string; category: string }>();
   const [activeTab, setActiveTab] = useState('overview');
@@ -31,8 +43,53 @@ const InfluencerDetailPage: React.FC = () => {
   const [recentVideos, setRecentVideos] = useState<any[]>([]);
   const [videosLoading, setVideosLoading] = useState(false);
   const [channelStats, setChannelStats] = useState<any>(null);
+  const [videoComments, setVideoComments] = useState<{ [videoId: string]: VideoComment[] }>({});
+  const [commentsLoading, setCommentsLoading] = useState<{ [videoId: string]: boolean }>({});
 
   const YOUTUBE_API_KEY = 'AIzaSyCZ1y5wlvF9Vof4eCWxBFwXTsfRGvB_K9U';
+
+  // Helper function to convert country codes to full country names
+  const getCountryName = (countryCode: string): string => {
+    const countryMap: { [key: string]: string } = {
+      'US': 'United States',
+      'CA': 'Canada', 
+      'GB': 'United Kingdom',
+      'UK': 'United Kingdom',
+      'IN': 'India',
+      'AU': 'Australia',
+      'DE': 'Germany',
+      'FR': 'France',
+      'JP': 'Japan',
+      'KR': 'South Korea',
+      'SG': 'Singapore',
+      'NL': 'Netherlands',
+      'SE': 'Sweden',
+      'NO': 'Norway',
+      'DK': 'Denmark',
+      'FI': 'Finland',
+      'CH': 'Switzerland',
+      'AT': 'Austria',
+      'BE': 'Belgium',
+      'IE': 'Ireland',
+      'NZ': 'New Zealand',
+      'BR': 'Brazil',
+      'MX': 'Mexico',
+      'ES': 'Spain',
+      'IT': 'Italy',
+      'PT': 'Portugal',
+      'RU': 'Russia',
+      'CN': 'China',
+      'TW': 'Taiwan',
+      'HK': 'Hong Kong',
+      'MY': 'Malaysia',
+      'TH': 'Thailand',
+      'PH': 'Philippines',
+      'ID': 'Indonesia',
+      'VN': 'Vietnam'
+    };
+    
+    return countryMap[countryCode] || countryCode || 'Not known';
+  };
 
   const formatSubscriberCount = (count: string): string => {
     const num = parseInt(count);
@@ -58,7 +115,7 @@ const InfluencerDetailPage: React.FC = () => {
         const channelData = await channelResponse.json();
         if (channelData.items && channelData.items.length > 0) {
           const channel = channelData.items[0];
-          
+
           // Store detailed channel statistics
           setChannelStats({
             viewCount: parseInt(channel.statistics.viewCount || '0'),
@@ -67,7 +124,7 @@ const InfluencerDetailPage: React.FC = () => {
             creationDate: new Date(channel.snippet.publishedAt),
             description: channel.snippet.description,
             customUrl: channel.snippet.customUrl,
-            country: channel.snippet.country
+            country: getCountryName(channel.snippet.country) // Convert country code to full name
           });
 
           const uploadsPlaylistId = channel.contentDetails.relatedPlaylists.uploads;
@@ -139,6 +196,94 @@ const InfluencerDetailPage: React.FC = () => {
     }
   };
 
+  // Fetch comments for a specific video
+  const fetchVideoComments = async (videoId: string) => {
+    try {
+      setCommentsLoading(prev => ({ ...prev, [videoId]: true }));
+
+      // Check if comments are already cached
+      const cacheKey = `youtube_comments_${videoId}`;
+      const cacheTimeKey = `youtube_comments_timestamp_${videoId}`;
+      const cacheExpiry = 24 * 60 * 60 * 1000; // 24 hours in milliseconds
+
+      const cachedComments = localStorage.getItem(cacheKey);
+      const cachedTime = localStorage.getItem(cacheTimeKey);
+
+      if (cachedComments && cachedTime) {
+        const timeDiff = Date.now() - parseInt(cachedTime);
+        if (timeDiff < cacheExpiry) {
+          console.log(`Using cached comments for video ${videoId}`);
+          const comments: VideoComment[] = JSON.parse(cachedComments);
+          setVideoComments(prev => ({ ...prev, [videoId]: comments }));
+          setCommentsLoading(prev => ({ ...prev, [videoId]: false }));
+          return;
+        }
+      }
+
+      console.log(`Fetching fresh comments for video ${videoId}`);
+
+      // Fetch comments from YouTube API
+      const commentsResponse = await fetch(
+        `https://www.googleapis.com/youtube/v3/commentThreads?part=snippet&videoId=${videoId}&maxResults=100&order=relevance&key=${YOUTUBE_API_KEY}`
+      );
+
+      if (commentsResponse.ok) {
+        const commentsData = await commentsResponse.json();
+        
+        if (commentsData.items) {
+          const formattedComments: VideoComment[] = commentsData.items.map((item: any) => ({
+            id: item.id,
+            videoId: videoId,
+            authorDisplayName: item.snippet.topLevelComment.snippet.authorDisplayName,
+            authorProfileImageUrl: item.snippet.topLevelComment.snippet.authorProfileImageUrl,
+            textDisplay: item.snippet.topLevelComment.snippet.textDisplay,
+            likeCount: item.snippet.topLevelComment.snippet.likeCount || 0,
+            publishedAt: item.snippet.topLevelComment.snippet.publishedAt,
+            replyCount: item.snippet.totalReplyCount || 0
+          }));
+
+          // Store comments in state
+          setVideoComments(prev => ({ ...prev, [videoId]: formattedComments }));
+
+          // Cache the comments
+          localStorage.setItem(cacheKey, JSON.stringify(formattedComments));
+          localStorage.setItem(cacheTimeKey, Date.now().toString());
+          
+          console.log(`Cached ${formattedComments.length} comments for video ${videoId}`);
+        }
+      } else {
+        console.log(`Comments may be disabled for video ${videoId}`);
+        // Store empty array to indicate comments were checked but not available
+        setVideoComments(prev => ({ ...prev, [videoId]: [] }));
+      }
+    } catch (error) {
+      console.error(`Error fetching comments for video ${videoId}:`, error);
+      setVideoComments(prev => ({ ...prev, [videoId]: [] }));
+    } finally {
+      setCommentsLoading(prev => ({ ...prev, [videoId]: false }));
+    }
+  };
+
+  // Fetch comments for all recent videos
+  const fetchAllVideoComments = async () => {
+    if (recentVideos.length === 0) return;
+    
+    console.log(`Starting to fetch comments for ${recentVideos.length} videos`);
+    
+    // Fetch comments for each video with a small delay to avoid rate limiting
+    for (let i = 0; i < recentVideos.length; i++) {
+      const video = recentVideos[i];
+      await fetchVideoComments(video.id);
+      
+      // Add a small delay between requests to be respectful to the API
+      if (i < recentVideos.length - 1) {
+        await new Promise(resolve => setTimeout(resolve, 200));
+      }
+    }
+    
+    console.log('Finished fetching comments for all videos');
+  };
+
   // Fetch influencer data based on channelId
   useEffect(() => {
     const fetchInfluencerData = async () => {
@@ -171,7 +316,7 @@ const InfluencerDetailPage: React.FC = () => {
               },
               engagementRate: parseFloat(foundInfluencer.engagement?.replace('%', '')) || 5.1,
               totalFollowers: foundInfluencer.followers,
-              country: foundInfluencer.country
+              country: foundInfluencer.country || 'Not known'
             });
             setLoading(false);
             // Fetch recent videos for this channel
@@ -203,7 +348,7 @@ const InfluencerDetailPage: React.FC = () => {
               },
               engagementRate: 5.1, // Default value
               totalFollowers: formatSubscriberCount(channel.statistics.subscriberCount || '0'),
-              country: channel.snippet.country
+              country: getCountryName(channel.snippet.country) // Convert country code to full name
             };
             setInfluencerData(formattedData);
             // Fetch recent videos for this channel
@@ -223,7 +368,8 @@ const InfluencerDetailPage: React.FC = () => {
             youtube: { followers: '1.2M', handle: 'TechInfluencer' }
           },
           engagementRate: 5.1,
-          totalFollowers: '1.2M'
+          totalFollowers: '1.2M',
+          country: 'Not known'
         });
       } finally {
         setLoading(false);
@@ -241,6 +387,13 @@ const InfluencerDetailPage: React.FC = () => {
         ...prev,
         engagementRate: dynamicEngagementRate
       } : null);
+    }
+  }, [recentVideos]);
+
+  // Fetch comments when videos are loaded
+  useEffect(() => {
+    if (recentVideos.length > 0) {
+      fetchAllVideoComments();
     }
   }, [recentVideos]);
 
@@ -342,6 +495,25 @@ const InfluencerDetailPage: React.FC = () => {
     return num.toString();
   };
 
+  // Helper function to get total comments count across all videos
+  const getTotalCommentsCount = () => {
+    return Object.values(videoComments).reduce((total, comments) => total + comments.length, 0);
+  };
+
+  // Helper function to get average comment sentiment (placeholder for future AI analysis)
+  const getCommentSentiment = (videoId: string) => {
+    const comments = videoComments[videoId];
+    if (!comments || comments.length === 0) return 'neutral';
+    
+    // Placeholder logic - in the future, you can implement AI sentiment analysis here
+    const totalLikes = comments.reduce((sum, comment) => sum + comment.likeCount, 0);
+    const avgLikes = totalLikes / comments.length;
+    
+    if (avgLikes > 5) return 'positive';
+    if (avgLikes < 2) return 'negative';
+    return 'neutral';
+  };
+
   // Helper functions for YouTube analytics
   const calculateAverageViews = () => {
     if (!recentVideos.length) return 0;
@@ -360,10 +532,10 @@ const InfluencerDetailPage: React.FC = () => {
     if (!recentVideos.length) return 'Unknown';
     const sortedVideos = recentVideos.sort((a, b) => new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime());
     if (sortedVideos.length < 2) return 'Insufficient data';
-    
+
     const daysBetween = (new Date(sortedVideos[0].publishedAt).getTime() - new Date(sortedVideos[sortedVideos.length - 1].publishedAt).getTime()) / (1000 * 60 * 60 * 24);
     const avgDaysBetween = daysBetween / (sortedVideos.length - 1);
-    
+
     if (avgDaysBetween <= 1) return 'Daily';
     else if (avgDaysBetween <= 3) return '2-3 times/week';
     else if (avgDaysBetween <= 7) return 'Weekly';
@@ -373,7 +545,7 @@ const InfluencerDetailPage: React.FC = () => {
 
   const getBestPerformingVideo = () => {
     if (!recentVideos.length) return null;
-    return recentVideos.reduce((best, current) => 
+    return recentVideos.reduce((best, current) =>
       current.views > best.views ? current : best
     );
   };
@@ -385,7 +557,7 @@ const InfluencerDetailPage: React.FC = () => {
     const diffTime = Math.abs(now.getTime() - created.getTime());
     const diffYears = Math.floor(diffTime / (1000 * 60 * 60 * 24 * 365));
     const diffMonths = Math.floor((diffTime % (1000 * 60 * 60 * 24 * 365)) / (1000 * 60 * 60 * 24 * 30));
-    
+
     if (diffYears > 0) {
       return diffMonths > 0 ? `${diffYears}y ${diffMonths}m` : `${diffYears} year${diffYears > 1 ? 's' : ''}`;
     }
@@ -441,6 +613,9 @@ const InfluencerDetailPage: React.FC = () => {
                     <h2 className="text-3xl font-bold text-gray-900">{influencerData.name}</h2>
                     <p className="text-lg text-gray-600 mt-1">{influencerData.handle}</p>
                     <p className="text-sm text-gray-500 mt-2">{influencerData.niche}</p>
+                    <p className="text-sm text-gray-500 mt-1">
+                      📍 {influencerData.country || 'Not known'}
+                    </p>
 
                     {/* Platform Badges */}
                     <div className="flex items-center space-x-4 mt-4">
@@ -754,6 +929,65 @@ const InfluencerDetailPage: React.FC = () => {
                         </div>
                       </div>
                       <div className="text-xs text-gray-400">{video.date}</div>
+                      
+                      {/* Comments Section */}
+                      <div className="mt-3 border-t pt-3">
+                        <div className="flex items-center justify-between mb-2">
+                          <button
+                            onClick={() => {
+                              const commentsSection = document.getElementById(`comments-${video.id}`);
+                              if (commentsSection) {
+                                commentsSection.style.display = commentsSection.style.display === 'none' ? 'block' : 'none';
+                              }
+                            }}
+                            className="text-xs text-blue-600 hover:text-blue-800 font-medium"
+                          >
+                            <i className="fas fa-comments mr-1"></i>
+                            View Comments ({videoComments[video.id]?.length || 0})
+                          </button>
+                          {commentsLoading[video.id] && (
+                            <i className="fas fa-spinner fa-spin text-xs text-gray-400"></i>
+                          )}
+                        </div>
+                        
+                        <div id={`comments-${video.id}`} style={{ display: 'none' }} className="max-h-60 overflow-y-auto">
+                          {videoComments[video.id] && videoComments[video.id].length > 0 ? (
+                            <div className="space-y-2">
+                              {videoComments[video.id].slice(0, 5).map((comment) => (
+                                <div key={comment.id} className="flex space-x-2 p-2 bg-gray-50 rounded text-xs">
+                                  <img 
+                                    src={comment.authorProfileImageUrl} 
+                                    alt={comment.authorDisplayName}
+                                    className="w-6 h-6 rounded-full flex-shrink-0"
+                                  />
+                                  <div className="flex-1 min-w-0">
+                                    <div className="font-medium text-gray-900">{comment.authorDisplayName}</div>
+                                    <div className="text-gray-600 line-clamp-2">{comment.textDisplay}</div>
+                                    <div className="flex items-center space-x-2 mt-1 text-gray-400">
+                                      <span>{comment.likeCount} likes</span>
+                                      <span>•</span>
+                                      <span>{new Date(comment.publishedAt).toLocaleDateString()}</span>
+                                    </div>
+                                  </div>
+                                </div>
+                              ))}
+                              {videoComments[video.id].length > 5 && (
+                                <div className="text-xs text-center text-gray-500 py-1">
+                                  Showing 5 of {videoComments[video.id].length} comments
+                                </div>
+                              )}
+                            </div>
+                          ) : videoComments[video.id] && videoComments[video.id].length === 0 ? (
+                            <div className="text-xs text-gray-500 text-center py-2">
+                              No comments available for this video
+                            </div>
+                          ) : (
+                            <div className="text-xs text-gray-500 text-center py-2">
+                              Comments not loaded yet
+                            </div>
+                          )}
+                        </div>
+                      </div>
                     </div>
                   </div>
                 ))}
@@ -856,7 +1090,7 @@ const InfluencerDetailPage: React.FC = () => {
                       <div className="text-xs text-gray-600">Created</div>
                     </div>
                   </div>
-                  
+
                   <div className="flex items-center justify-between p-3 bg-blue-50 rounded-lg">
                     <div>
                       <div className="text-sm font-medium text-gray-900">Upload Frequency</div>
@@ -867,7 +1101,7 @@ const InfluencerDetailPage: React.FC = () => {
                       <div className="text-xs text-gray-600">Consistency</div>
                     </div>
                   </div>
-                  
+
                   <div className="flex items-center justify-between p-3 bg-green-50 rounded-lg">
                     <div>
                       <div className="text-sm font-medium text-gray-900">Views per Subscriber</div>
@@ -875,7 +1109,7 @@ const InfluencerDetailPage: React.FC = () => {
                     </div>
                     <div className="text-right">
                       <div className="text-sm font-semibold text-green-600">
-                        {channelStats && channelStats.subscriberCount > 0 
+                        {channelStats && channelStats.subscriberCount > 0
                           ? (channelStats.viewCount / channelStats.subscriberCount).toFixed(1)
                           : 'N/A'}
                       </div>
@@ -892,7 +1126,7 @@ const InfluencerDetailPage: React.FC = () => {
                   {recentVideos.length > 0 ? (
                     <>
                       <div className="text-sm text-gray-600 mb-3">Performance metrics from last {recentVideos.length} videos</div>
-                      
+
                       <div className="grid grid-cols-3 gap-3 text-center">
                         <div className="p-3 bg-yellow-50 rounded-lg">
                           <div className="text-lg font-semibold text-yellow-600">
@@ -919,8 +1153,8 @@ const InfluencerDetailPage: React.FC = () => {
                           <div className="text-sm font-medium text-gray-900 mb-1">🏆 Best Performing Recent Video</div>
                           <div className="text-sm text-gray-700 font-medium">{getBestPerformingVideo()?.title}</div>
                           <div className="text-xs text-gray-500 mt-1">
-                            {formatNumber(getBestPerformingVideo()?.views || 0)} views • 
-                            {formatNumber(getBestPerformingVideo()?.likes || 0)} likes • 
+                            {formatNumber(getBestPerformingVideo()?.views || 0)} views •
+                            {formatNumber(getBestPerformingVideo()?.likes || 0)} likes •
                             {getBestPerformingVideo()?.date}
                           </div>
                         </div>
@@ -995,16 +1229,16 @@ const InfluencerDetailPage: React.FC = () => {
                       <div className="text-xs text-gray-600 mt-1">Subs per Video</div>
                     </div>
                   </div>
-                  
+
                   <div className="pt-4 border-t">
                     <h4 className="text-sm font-medium text-gray-700 mb-3">Content Strategy Insights</h4>
                     <div className="space-y-2 text-sm">
                       <div className="flex items-center justify-between">
                         <span className="text-gray-600">Upload Consistency</span>
                         <span className={`px-2 py-1 rounded-full text-xs ${
-                          calculateUploadFrequency() === 'Daily' || calculateUploadFrequency() === '2-3 times/week' 
-                            ? 'bg-green-100 text-green-700' 
-                            : calculateUploadFrequency() === 'Weekly' 
+                          calculateUploadFrequency() === 'Daily' || calculateUploadFrequency() === '2-3 times/week'
+                            ? 'bg-green-100 text-green-700'
+                            : calculateUploadFrequency() === 'Weekly'
                             ? 'bg-yellow-100 text-yellow-700'
                             : 'bg-gray-100 text-gray-700'
                         }`}>
@@ -1014,18 +1248,74 @@ const InfluencerDetailPage: React.FC = () => {
                       <div className="flex items-center justify-between">
                         <span className="text-gray-600">Engagement Quality</span>
                         <span className={`px-2 py-1 rounded-full text-xs ${
-                          calculateEngagementRate() > 3 
-                            ? 'bg-green-100 text-green-700' 
-                            : calculateEngagementRate() > 1 
+                          calculateEngagementRate() > 3
+                            ? 'bg-green-100 text-green-700'
+                            : calculateEngagementRate() > 1
                             ? 'bg-yellow-100 text-yellow-700'
                             : 'bg-red-100 text-red-700'
                         }`}>
-                          {calculateEngagementRate() > 3 ? 'Excellent' : 
+                          {calculateEngagementRate() > 3 ? 'Excellent' :
                            calculateEngagementRate() > 1 ? 'Good' : 'Needs Improvement'}
                         </span>
                       </div>
                     </div>
                   </div>
+                </div>
+              </div>
+
+              {/* Comment Analytics */}
+              <div className="bg-white rounded-lg shadow-sm border p-6">
+                <h3 className="text-lg font-semibold text-gray-900 mb-4">
+                  <i className="fas fa-comments text-blue-600 mr-2"></i>
+                  Comment Analytics
+                </h3>
+                <div className="space-y-4">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="text-center p-4 bg-blue-50 rounded-lg">
+                      <div className="text-2xl font-bold text-blue-600">
+                        {getTotalCommentsCount()}
+                      </div>
+                      <div className="text-xs text-gray-600 mt-1">Total Comments Stored</div>
+                    </div>
+                    <div className="text-center p-4 bg-green-50 rounded-lg">
+                      <div className="text-2xl font-bold text-green-600">
+                        {recentVideos.length > 0 ? Math.round(getTotalCommentsCount() / recentVideos.length) : 0}
+                      </div>
+                      <div className="text-xs text-gray-600 mt-1">Avg Comments/Video</div>
+                    </div>
+                  </div>
+
+                  <div className="pt-4 border-t">
+                    <h4 className="text-sm font-medium text-gray-700 mb-3">Comment Analysis Ready</h4>
+                    <div className="space-y-2 text-sm">
+                      <div className="flex items-center justify-between">
+                        <span className="text-gray-600">Videos with Comments</span>
+                        <span className="text-green-600 font-medium">
+                          {Object.keys(videoComments).filter(videoId => videoComments[videoId].length > 0).length} / {recentVideos.length}
+                        </span>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <span className="text-gray-600">AI Analysis Status</span>
+                        <span className="px-2 py-1 rounded-full text-xs bg-yellow-100 text-yellow-700">
+                          Ready for Processing
+                        </span>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <span className="text-gray-600">Data Collection</span>
+                        <span className="px-2 py-1 rounded-full text-xs bg-green-100 text-green-700">
+                          {getTotalCommentsCount() > 0 ? 'Complete' : 'In Progress'}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {getTotalCommentsCount() > 0 && (
+                    <div className="pt-4 border-t">
+                      <div className="text-xs text-gray-500 text-center">
+                        💡 Comment data is stored and ready for AI sentiment analysis, engagement pattern detection, and audience insight generation.
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
