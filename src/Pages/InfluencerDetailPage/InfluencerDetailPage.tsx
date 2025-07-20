@@ -30,6 +30,7 @@ const InfluencerDetailPage: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [recentVideos, setRecentVideos] = useState<any[]>([]);
   const [videosLoading, setVideosLoading] = useState(false);
+  const [channelStats, setChannelStats] = useState<any>(null);
 
   const YOUTUBE_API_KEY = 'AIzaSyCZ1y5wlvF9Vof4eCWxBFwXTsfRGvB_K9U';
 
@@ -47,39 +48,55 @@ const InfluencerDetailPage: React.FC = () => {
   const fetchRecentVideos = async (channelId: string) => {
     try {
       setVideosLoading(true);
-      
-      // First, get the uploads playlist ID
+
+      // First, get the uploads playlist ID and channel statistics
       const channelResponse = await fetch(
-        `https://www.googleapis.com/youtube/v3/channels?part=contentDetails&id=${channelId}&key=${YOUTUBE_API_KEY}`
+        `https://www.googleapis.com/youtube/v3/channels?part=contentDetails,statistics,snippet&id=${channelId}&key=${YOUTUBE_API_KEY}`
       );
-      
+
       if (channelResponse.ok) {
         const channelData = await channelResponse.json();
         if (channelData.items && channelData.items.length > 0) {
-          const uploadsPlaylistId = channelData.items[0].contentDetails.relatedPlaylists.uploads;
+          const channel = channelData.items[0];
           
+          // Store detailed channel statistics
+          setChannelStats({
+            viewCount: parseInt(channel.statistics.viewCount || '0'),
+            subscriberCount: parseInt(channel.statistics.subscriberCount || '0'),
+            videoCount: parseInt(channel.statistics.videoCount || '0'),
+            creationDate: new Date(channel.snippet.publishedAt),
+            description: channel.snippet.description,
+            customUrl: channel.snippet.customUrl,
+            country: channel.snippet.country
+          });
+
+          const uploadsPlaylistId = channel.contentDetails.relatedPlaylists.uploads;
+
           // Get recent videos from uploads playlist
           const videosResponse = await fetch(
-            `https://www.googleapis.com/youtube/v3/playlistItems?part=snippet&playlistId=${uploadsPlaylistId}&maxResults=6&key=${YOUTUBE_API_KEY}`
+            `https://www.googleapis.com/youtube/v3/playlistItems?part=snippet&playlistId=${uploadsPlaylistId}&maxResults=10&key=${YOUTUBE_API_KEY}`
           );
-          
+
           if (videosResponse.ok) {
             const videosData = await videosResponse.json();
             if (videosData.items) {
               // Get video statistics for each video
               const videoIds = videosData.items.map((item: any) => item.snippet.resourceId.videoId).join(',');
               const statsResponse = await fetch(
-                `https://www.googleapis.com/youtube/v3/videos?part=statistics&id=${videoIds}&key=${YOUTUBE_API_KEY}`
+                `https://www.googleapis.com/youtube/v3/videos?part=statistics,contentDetails&id=${videoIds}&key=${YOUTUBE_API_KEY}`
               );
-              
+
               let videoStats: any = {};
               if (statsResponse.ok) {
                 const statsData = await statsResponse.json();
                 statsData.items?.forEach((video: any) => {
-                  videoStats[video.id] = video.statistics;
+                  videoStats[video.id] = {
+                    ...video.statistics,
+                    duration: video.contentDetails.duration
+                  };
                 });
               }
-              
+
               const formattedVideos = videosData.items.map((item: any) => {
                 const videoId = item.snippet.resourceId.videoId;
                 const stats = videoStats[videoId] || {};
@@ -87,13 +104,13 @@ const InfluencerDetailPage: React.FC = () => {
                 const now = new Date();
                 const diffTime = Math.abs(now.getTime() - publishedDate.getTime());
                 const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-                
+
                 let timeAgo = '';
                 if (diffDays === 1) timeAgo = '1 day ago';
                 else if (diffDays < 7) timeAgo = `${diffDays} days ago`;
                 else if (diffDays < 30) timeAgo = `${Math.ceil(diffDays / 7)} weeks ago`;
                 else timeAgo = `${Math.ceil(diffDays / 30)} months ago`;
-                
+
                 return {
                   id: videoId,
                   platform: 'youtube',
@@ -102,12 +119,14 @@ const InfluencerDetailPage: React.FC = () => {
                   caption: item.snippet.description?.substring(0, 150) + '...' || '',
                   type: 'Video',
                   date: timeAgo,
+                  publishedAt: publishedDate,
                   views: parseInt(stats.viewCount || '0'),
                   likes: parseInt(stats.likeCount || '0'),
-                  comments: parseInt(stats.commentCount || '0')
+                  comments: parseInt(stats.commentCount || '0'),
+                  duration: stats.duration
                 };
               });
-              
+
               setRecentVideos(formattedVideos);
             }
           }
@@ -310,6 +329,56 @@ const InfluencerDetailPage: React.FC = () => {
     if (num >= 1000000) return (num / 1000000).toFixed(1) + 'M';
     if (num >= 1000) return (num / 1000).toFixed(1) + 'K';
     return num.toString();
+  };
+
+  // Helper functions for YouTube analytics
+  const calculateAverageViews = () => {
+    if (!recentVideos.length) return 0;
+    const totalViews = recentVideos.reduce((sum, video) => sum + video.views, 0);
+    return Math.round(totalViews / recentVideos.length);
+  };
+
+  const calculateEngagementRate = () => {
+    if (!recentVideos.length) return 0;
+    const totalEngagement = recentVideos.reduce((sum, video) => sum + video.likes + video.comments, 0);
+    const totalViews = recentVideos.reduce((sum, video) => sum + video.views, 0);
+    return totalViews > 0 ? ((totalEngagement / totalViews) * 100) : 0;
+  };
+
+  const calculateUploadFrequency = () => {
+    if (!recentVideos.length) return 'Unknown';
+    const sortedVideos = recentVideos.sort((a, b) => new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime());
+    if (sortedVideos.length < 2) return 'Insufficient data';
+    
+    const daysBetween = (new Date(sortedVideos[0].publishedAt).getTime() - new Date(sortedVideos[sortedVideos.length - 1].publishedAt).getTime()) / (1000 * 60 * 60 * 24);
+    const avgDaysBetween = daysBetween / (sortedVideos.length - 1);
+    
+    if (avgDaysBetween <= 1) return 'Daily';
+    else if (avgDaysBetween <= 3) return '2-3 times/week';
+    else if (avgDaysBetween <= 7) return 'Weekly';
+    else if (avgDaysBetween <= 14) return 'Bi-weekly';
+    else return 'Monthly';
+  };
+
+  const getBestPerformingVideo = () => {
+    if (!recentVideos.length) return null;
+    return recentVideos.reduce((best, current) => 
+      current.views > best.views ? current : best
+    );
+  };
+
+  const getChannelAge = () => {
+    if (!channelStats?.creationDate) return 'Unknown';
+    const now = new Date();
+    const created = new Date(channelStats.creationDate);
+    const diffTime = Math.abs(now.getTime() - created.getTime());
+    const diffYears = Math.floor(diffTime / (1000 * 60 * 60 * 24 * 365));
+    const diffMonths = Math.floor((diffTime % (1000 * 60 * 60 * 24 * 365)) / (1000 * 60 * 60 * 24 * 30));
+    
+    if (diffYears > 0) {
+      return diffMonths > 0 ? `${diffYears}y ${diffMonths}m` : `${diffYears} year${diffYears > 1 ? 's' : ''}`;
+    }
+    return `${diffMonths} month${diffMonths > 1 ? 's' : ''}`;
   };
 
   return (
@@ -594,8 +663,8 @@ const InfluencerDetailPage: React.FC = () => {
                 </div>
               </div>
               <div className="text-sm text-gray-500">
-                {videosLoading ? 'Loading videos...' : 
-                 recentVideos.length > 0 ? `Showing ${recentVideos.length} recent videos` : 
+                {videosLoading ? 'Loading videos...' :
+                 recentVideos.length > 0 ? `Showing ${recentVideos.length} recent videos` :
                  'No recent videos found'}
               </div>
             </div>
@@ -637,7 +706,7 @@ const InfluencerDetailPage: React.FC = () => {
                         </div>
                       </div>
                       <div className="absolute bottom-3 right-3">
-                        <a 
+                        <a
                           href={`https://www.youtube.com/watch?v=${video.id}`}
                           target="_blank"
                           rel="noopener noreferrer"
@@ -730,174 +799,214 @@ const InfluencerDetailPage: React.FC = () => {
             {/* Performance Overview */}
             <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
               <div className="bg-white rounded-lg shadow-sm border p-6 text-center">
-                <div className="text-3xl font-bold text-blue-600">5.1%</div>
+                <div className="text-3xl font-bold text-blue-600">{calculateEngagementRate().toFixed(2)}%</div>
                 <div className="text-sm text-gray-600">Avg. Engagement Rate</div>
-                <div className="text-xs text-green-600 mt-1">↗ +0.3% vs last month</div>
+                <div className="text-xs text-green-600 mt-1">Based on recent videos</div>
               </div>
               <div className="bg-white rounded-lg shadow-sm border p-6 text-center">
-                <div className="text-3xl font-bold text-green-600">2.1M</div>
-                <div className="text-sm text-gray-600">Total Reach</div>
-                <div className="text-xs text-green-600 mt-1">↗ +12% vs last month</div>
+                <div className="text-3xl font-bold text-green-600">{channelStats ? formatNumber(channelStats.viewCount) : 'N/A'}</div>
+                <div className="text-sm text-gray-600">Total Channel Views</div>
+                <div className="text-xs text-gray-500 mt-1">All-time views</div>
               </div>
               <div className="bg-white rounded-lg shadow-sm border p-6 text-center">
-                <div className="text-3xl font-bold text-purple-600">156K</div>
+                <div className="text-3xl font-bold text-purple-600">{formatNumber(calculateAverageViews())}</div>
                 <div className="text-sm text-gray-600">Avg. Video Views</div>
-                <div className="text-xs text-green-600 mt-1">↗ +8% vs last month</div>
+                <div className="text-xs text-gray-500 mt-1">Recent videos average</div>
               </div>
               <div className="bg-white rounded-lg shadow-sm border p-6 text-center">
-                <div className="text-3xl font-bold text-orange-600">$2.5K</div>
-                <div className="text-sm text-gray-600">Est. Post Value</div>
-                <div className="text-xs text-gray-500 mt-1">Based on engagement</div>
+                <div className="text-3xl font-bold text-orange-600">{channelStats ? formatNumber(channelStats.videoCount) : 'N/A'}</div>
+                <div className="text-sm text-gray-600">Total Videos</div>
+                <div className="text-xs text-gray-500 mt-1">Channel lifetime</div>
               </div>
             </div>
 
-            {/* Detailed Analytics */}
+            {/* YouTube Channel Statistics */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-              {/* Engagement Trends */}
+              {/* Channel Performance Metrics */}
               <div className="bg-white rounded-lg shadow-sm border p-6">
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">Engagement Trends (Last 90 Days)</h3>
-                <div className="h-64 bg-gray-50 rounded-lg flex items-center justify-center">
-                  <div className="text-center text-gray-500">
-                    <i className="fas fa-chart-area text-4xl mb-2"></i>
-                    <div className="text-sm">Engagement trends chart would appear here</div>
-                    <div className="text-xs text-gray-400 mt-1">Integration with analytics API required</div>
+                <h3 className="text-lg font-semibold text-gray-900 mb-4">
+                  <i className="fab fa-youtube text-red-600 mr-2"></i>
+                  Channel Performance
+                </h3>
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between p-3 bg-red-50 rounded-lg">
+                    <div>
+                      <div className="text-sm font-medium text-gray-900">Channel Age</div>
+                      <div className="text-xs text-gray-600">{getChannelAge()}</div>
+                    </div>
+                    <div className="text-right">
+                      <div className="text-sm font-semibold text-red-600">{channelStats ? new Date(channelStats.creationDate).getFullYear() : 'N/A'}</div>
+                      <div className="text-xs text-gray-600">Created</div>
+                    </div>
+                  </div>
+                  
+                  <div className="flex items-center justify-between p-3 bg-blue-50 rounded-lg">
+                    <div>
+                      <div className="text-sm font-medium text-gray-900">Upload Frequency</div>
+                      <div className="text-xs text-gray-600">Based on recent uploads</div>
+                    </div>
+                    <div className="text-right">
+                      <div className="text-sm font-semibold text-blue-600">{calculateUploadFrequency()}</div>
+                      <div className="text-xs text-gray-600">Consistency</div>
+                    </div>
+                  </div>
+                  
+                  <div className="flex items-center justify-between p-3 bg-green-50 rounded-lg">
+                    <div>
+                      <div className="text-sm font-medium text-gray-900">Views per Subscriber</div>
+                      <div className="text-xs text-gray-600">Channel efficiency metric</div>
+                    </div>
+                    <div className="text-right">
+                      <div className="text-sm font-semibold text-green-600">
+                        {channelStats && channelStats.subscriberCount > 0 
+                          ? (channelStats.viewCount / channelStats.subscriberCount).toFixed(1)
+                          : 'N/A'}
+                      </div>
+                      <div className="text-xs text-gray-600">Ratio</div>
+                    </div>
                   </div>
                 </div>
               </div>
 
-              {/* Audience Demographics */}
+              {/* Recent Video Performance */}
               <div className="bg-white rounded-lg shadow-sm border p-6">
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">Audience Demographics</h3>
+                <h3 className="text-lg font-semibold text-gray-900 mb-4">Recent Video Analytics</h3>
                 <div className="space-y-4">
-                  <div>
-                    <h4 className="text-sm font-medium text-gray-700 mb-2">Age Groups</h4>
-                    <div className="space-y-2">
-                      <div className="flex items-center justify-between">
-                        <span className="text-sm text-gray-600">18-24</span>
-                        <div className="flex items-center space-x-2">
-                          <div className="w-24 h-2 bg-gray-200 rounded">
-                            <div className="w-3/4 h-2 bg-blue-500 rounded"></div>
+                  {recentVideos.length > 0 ? (
+                    <>
+                      <div className="text-sm text-gray-600 mb-3">Performance metrics from last {recentVideos.length} videos</div>
+                      
+                      <div className="grid grid-cols-3 gap-3 text-center">
+                        <div className="p-3 bg-yellow-50 rounded-lg">
+                          <div className="text-lg font-semibold text-yellow-600">
+                            {formatNumber(Math.max(...recentVideos.map(v => v.views)))}
                           </div>
-                          <span className="text-sm font-medium">35%</span>
+                          <div className="text-xs text-gray-600">Highest Views</div>
+                        </div>
+                        <div className="p-3 bg-red-50 rounded-lg">
+                          <div className="text-lg font-semibold text-red-600">
+                            {formatNumber(Math.max(...recentVideos.map(v => v.likes)))}
+                          </div>
+                          <div className="text-xs text-gray-600">Most Likes</div>
+                        </div>
+                        <div className="p-3 bg-blue-50 rounded-lg">
+                          <div className="text-lg font-semibold text-blue-600">
+                            {formatNumber(Math.max(...recentVideos.map(v => v.comments)))}
+                          </div>
+                          <div className="text-xs text-gray-600">Most Comments</div>
                         </div>
                       </div>
-                      <div className="flex items-center justify-between">
-                        <span className="text-sm text-gray-600">25-34</span>
-                        <div className="flex items-center space-x-2">
-                          <div className="w-24 h-2 bg-gray-200 rounded">
-                            <div className="w-2/3 h-2 bg-green-500 rounded"></div>
+
+                      {getBestPerformingVideo() && (
+                        <div className="mt-4 p-3 bg-gradient-to-r from-yellow-50 to-orange-50 rounded-lg border">
+                          <div className="text-sm font-medium text-gray-900 mb-1">🏆 Best Performing Recent Video</div>
+                          <div className="text-sm text-gray-700 font-medium">{getBestPerformingVideo()?.title}</div>
+                          <div className="text-xs text-gray-500 mt-1">
+                            {formatNumber(getBestPerformingVideo()?.views || 0)} views • 
+                            {formatNumber(getBestPerformingVideo()?.likes || 0)} likes • 
+                            {getBestPerformingVideo()?.date}
                           </div>
-                          <span className="text-sm font-medium">28%</span>
                         </div>
-                      </div>
-                      <div className="flex items-center justify-between">
-                        <span className="text-sm text-gray-600">35-44</span>
-                        <div className="flex items-center space-x-2">
-                          <div className="w-24 h-2 bg-gray-200 rounded">
-                            <div className="w-1/2 h-2 bg-purple-500 rounded"></div>
-                          </div>
-                          <span className="text-sm font-medium">22%</span>
+                      )}
+                    </>
+                  ) : (
+                    <div className="text-center text-gray-500 py-8">
+                      <i className="fas fa-video text-3xl mb-2"></i>
+                      <div className="text-sm">No recent video data available</div>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Engagement Breakdown */}
+              <div className="bg-white rounded-lg shadow-sm border p-6">
+                <h3 className="text-lg font-semibold text-gray-900 mb-4">Engagement Breakdown</h3>
+                {recentVideos.length > 0 ? (
+                  <div className="space-y-4">
+                    <div>
+                      <h4 className="text-sm font-medium text-gray-700 mb-2">Average Engagement per Video</h4>
+                      <div className="space-y-2">
+                        <div className="flex items-center justify-between">
+                          <span className="text-sm text-gray-600">Likes</span>
+                          <span className="text-sm font-medium">
+                            {formatNumber(Math.round(recentVideos.reduce((sum, v) => sum + v.likes, 0) / recentVideos.length))}
+                          </span>
                         </div>
-                      </div>
-                      <div className="flex items-center justify-between">
-                        <span className="text-sm text-gray-600">45+</span>
-                        <div className="flex items-center space-x-2">
-                          <div className="w-24 h-2 bg-gray-200 rounded">
-                            <div className="w-1/3 h-2 bg-orange-500 rounded"></div>
-                          </div>
-                          <span className="text-sm font-medium">15%</span>
+                        <div className="flex items-center justify-between">
+                          <span className="text-sm text-gray-600">Comments</span>
+                          <span className="text-sm font-medium">
+                            {formatNumber(Math.round(recentVideos.reduce((sum, v) => sum + v.comments, 0) / recentVideos.length))}
+                          </span>
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <span className="text-sm text-gray-600">Like-to-View Ratio</span>
+                          <span className="text-sm font-medium">
+                            {(recentVideos.reduce((sum, v) => sum + (v.views > 0 ? v.likes / v.views : 0), 0) / recentVideos.length * 100).toFixed(2)}%
+                          </span>
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <span className="text-sm text-gray-600">Comment-to-View Ratio</span>
+                          <span className="text-sm font-medium">
+                            {(recentVideos.reduce((sum, v) => sum + (v.views > 0 ? v.comments / v.views : 0), 0) / recentVideos.length * 100).toFixed(3)}%
+                          </span>
                         </div>
                       </div>
                     </div>
                   </div>
+                ) : (
+                  <div className="text-center text-gray-500 py-4">
+                    <div className="text-sm">No engagement data available</div>
+                  </div>
+                )}
+              </div>
 
+              {/* Channel Growth Metrics */}
+              <div className="bg-white rounded-lg shadow-sm border p-6">
+                <h3 className="text-lg font-semibold text-gray-900 mb-4">Growth Metrics</h3>
+                <div className="space-y-4">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="text-center p-4 bg-indigo-50 rounded-lg">
+                      <div className="text-2xl font-bold text-indigo-600">
+                        {channelStats ? (channelStats.videoCount > 0 ? Math.round(channelStats.viewCount / channelStats.videoCount / 1000) + 'K' : 'N/A') : 'N/A'}
+                      </div>
+                      <div className="text-xs text-gray-600 mt-1">Avg Views/Video</div>
+                    </div>
+                    <div className="text-center p-4 bg-pink-50 rounded-lg">
+                      <div className="text-2xl font-bold text-pink-600">
+                        {channelStats ? (channelStats.videoCount > 0 ? Math.round(channelStats.subscriberCount / channelStats.videoCount) : 'N/A') : 'N/A'}
+                      </div>
+                      <div className="text-xs text-gray-600 mt-1">Subs per Video</div>
+                    </div>
+                  </div>
+                  
                   <div className="pt-4 border-t">
-                    <h4 className="text-sm font-medium text-gray-700 mb-2">Gender Split</h4>
-                    <div className="flex items-center space-x-4">
-                      <div className="flex items-center space-x-2">
-                        <div className="w-4 h-4 bg-blue-500 rounded"></div>
-                        <span className="text-sm text-gray-600">Male 58%</span>
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        <div className="w-4 h-4 bg-pink-500 rounded"></div>
-                        <span className="text-sm text-gray-600">Female 42%</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Best Posting Times */}
-              <div className="bg-white rounded-lg shadow-sm border p-6">
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">Best Posting Times</h3>
-                <div className="space-y-4">
-                  <div>
-                    <h4 className="text-sm font-medium text-gray-700 mb-2">Peak Engagement Hours</h4>
-                    <div className="grid grid-cols-3 gap-3 text-center">
-                      <div className="p-3 bg-green-50 rounded-lg">
-                        <div className="text-lg font-semibold text-green-600">9 AM</div>
-                        <div className="text-xs text-gray-600">Morning Peak</div>
-                      </div>
-                      <div className="p-3 bg-blue-50 rounded-lg">
-                        <div className="text-lg font-semibold text-blue-600">1 PM</div>
-                        <div className="text-xs text-gray-600">Lunch Time</div>
-                      </div>
-                      <div className="p-3 bg-purple-50 rounded-lg">
-                        <div className="text-lg font-semibold text-purple-600">7 PM</div>
-                        <div className="text-xs text-gray-600">Evening Peak</div>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div>
-                    <h4 className="text-sm font-medium text-gray-700 mb-2">Best Days</h4>
-                    <div className="flex flex-wrap gap-2">
-                      {['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map((day, idx) => (
-                        <span key={day} className={`px-3 py-1 text-xs rounded-full ${
-                          [1, 2, 4].includes(idx) ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-600'
+                    <h4 className="text-sm font-medium text-gray-700 mb-3">Content Strategy Insights</h4>
+                    <div className="space-y-2 text-sm">
+                      <div className="flex items-center justify-between">
+                        <span className="text-gray-600">Upload Consistency</span>
+                        <span className={`px-2 py-1 rounded-full text-xs ${
+                          calculateUploadFrequency() === 'Daily' || calculateUploadFrequency() === '2-3 times/week' 
+                            ? 'bg-green-100 text-green-700' 
+                            : calculateUploadFrequency() === 'Weekly' 
+                            ? 'bg-yellow-100 text-yellow-700'
+                            : 'bg-gray-100 text-gray-700'
                         }`}>
-                          {day}
+                          {calculateUploadFrequency()}
                         </span>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Content Performance */}
-              <div className="bg-white rounded-lg shadow-sm border p-6">
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">Content Performance</h3>
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                    <div>
-                      <div className="text-sm font-medium text-gray-900">Video Reviews</div>
-                      <div className="text-xs text-gray-600">Avg. 890K views</div>
-                    </div>
-                    <div className="text-right">
-                      <div className="text-sm font-semibold text-green-600">High</div>
-                      <div className="text-xs text-gray-600">6.2% engagement</div>
-                    </div>
-                  </div>
-
-                  <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                    <div>
-                      <div className="text-sm font-medium text-gray-900">Product Comparisons</div>
-                      <div className="text-xs text-gray-600">Avg. 650K views</div>
-                    </div>
-                    <div className="text-right">
-                      <div className="text-sm font-semibold text-blue-600">Medium</div>
-                      <div className="text-xs text-gray-600">4.8% engagement</div>
-                    </div>
-                  </div>
-
-                  <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                    <div>
-                      <div className="text-sm font-medium text-gray-900">Tech Tips</div>
-                      <div className="text-xs text-gray-600">Avg. 420K views</div>
-                    </div>
-                    <div className="text-right">
-                      <div className="text-sm font-semibold text-orange-600">Medium</div>
-                      <div className="text-xs text-gray-600">3.9% engagement</div>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <span className="text-gray-600">Engagement Quality</span>
+                        <span className={`px-2 py-1 rounded-full text-xs ${
+                          calculateEngagementRate() > 3 
+                            ? 'bg-green-100 text-green-700' 
+                            : calculateEngagementRate() > 1 
+                            ? 'bg-yellow-100 text-yellow-700'
+                            : 'bg-red-100 text-red-700'
+                        }`}>
+                          {calculateEngagementRate() > 3 ? 'Excellent' : 
+                           calculateEngagementRate() > 1 ? 'Good' : 'Needs Improvement'}
+                        </span>
+                      </div>
                     </div>
                   </div>
                 </div>
