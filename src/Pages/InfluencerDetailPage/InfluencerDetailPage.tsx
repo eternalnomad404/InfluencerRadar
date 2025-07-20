@@ -28,6 +28,8 @@ const InfluencerDetailPage: React.FC = () => {
   const [timeRange, setTimeRange] = useState('30');
   const [influencerData, setInfluencerData] = useState<InfluencerData | null>(null);
   const [loading, setLoading] = useState(true);
+  const [recentVideos, setRecentVideos] = useState<any[]>([]);
+  const [videosLoading, setVideosLoading] = useState(false);
 
   const YOUTUBE_API_KEY = 'AIzaSyCZ1y5wlvF9Vof4eCWxBFwXTsfRGvB_K9U';
 
@@ -39,6 +41,83 @@ const InfluencerDetailPage: React.FC = () => {
       return (num / 1000).toFixed(1) + 'K';
     }
     return count;
+  };
+
+  // Fetch recent videos for the channel
+  const fetchRecentVideos = async (channelId: string) => {
+    try {
+      setVideosLoading(true);
+      
+      // First, get the uploads playlist ID
+      const channelResponse = await fetch(
+        `https://www.googleapis.com/youtube/v3/channels?part=contentDetails&id=${channelId}&key=${YOUTUBE_API_KEY}`
+      );
+      
+      if (channelResponse.ok) {
+        const channelData = await channelResponse.json();
+        if (channelData.items && channelData.items.length > 0) {
+          const uploadsPlaylistId = channelData.items[0].contentDetails.relatedPlaylists.uploads;
+          
+          // Get recent videos from uploads playlist
+          const videosResponse = await fetch(
+            `https://www.googleapis.com/youtube/v3/playlistItems?part=snippet&playlistId=${uploadsPlaylistId}&maxResults=6&key=${YOUTUBE_API_KEY}`
+          );
+          
+          if (videosResponse.ok) {
+            const videosData = await videosResponse.json();
+            if (videosData.items) {
+              // Get video statistics for each video
+              const videoIds = videosData.items.map((item: any) => item.snippet.resourceId.videoId).join(',');
+              const statsResponse = await fetch(
+                `https://www.googleapis.com/youtube/v3/videos?part=statistics&id=${videoIds}&key=${YOUTUBE_API_KEY}`
+              );
+              
+              let videoStats: any = {};
+              if (statsResponse.ok) {
+                const statsData = await statsResponse.json();
+                statsData.items?.forEach((video: any) => {
+                  videoStats[video.id] = video.statistics;
+                });
+              }
+              
+              const formattedVideos = videosData.items.map((item: any) => {
+                const videoId = item.snippet.resourceId.videoId;
+                const stats = videoStats[videoId] || {};
+                const publishedDate = new Date(item.snippet.publishedAt);
+                const now = new Date();
+                const diffTime = Math.abs(now.getTime() - publishedDate.getTime());
+                const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                
+                let timeAgo = '';
+                if (diffDays === 1) timeAgo = '1 day ago';
+                else if (diffDays < 7) timeAgo = `${diffDays} days ago`;
+                else if (diffDays < 30) timeAgo = `${Math.ceil(diffDays / 7)} weeks ago`;
+                else timeAgo = `${Math.ceil(diffDays / 30)} months ago`;
+                
+                return {
+                  id: videoId,
+                  platform: 'youtube',
+                  thumbnail: item.snippet.thumbnails?.medium?.url || item.snippet.thumbnails?.default?.url,
+                  title: item.snippet.title,
+                  caption: item.snippet.description?.substring(0, 150) + '...' || '',
+                  type: 'Video',
+                  date: timeAgo,
+                  views: parseInt(stats.viewCount || '0'),
+                  likes: parseInt(stats.likeCount || '0'),
+                  comments: parseInt(stats.commentCount || '0')
+                };
+              });
+              
+              setRecentVideos(formattedVideos);
+            }
+          }
+        }
+      }
+    } catch (error) {
+      console.error('Error fetching recent videos:', error);
+    } finally {
+      setVideosLoading(false);
+    }
   };
 
   // Fetch influencer data based on channelId
@@ -57,7 +136,7 @@ const InfluencerDetailPage: React.FC = () => {
         if (cachedInfluencers) {
           const influencers = JSON.parse(cachedInfluencers);
           const foundInfluencer = influencers.find((inf: any) => inf.id === channelId);
-          
+
           if (foundInfluencer) {
             setInfluencerData({
               id: foundInfluencer.id,
@@ -66,8 +145,8 @@ const InfluencerDetailPage: React.FC = () => {
               profileImage: foundInfluencer.profileImage,
               niche: foundInfluencer.category || 'Technology',
               platforms: {
-                youtube: { 
-                  followers: foundInfluencer.followers, 
+                youtube: {
+                  followers: foundInfluencer.followers,
                   handle: foundInfluencer.name.replace(/\s+/g, '')
                 }
               },
@@ -76,6 +155,8 @@ const InfluencerDetailPage: React.FC = () => {
               country: foundInfluencer.country
             });
             setLoading(false);
+            // Fetch recent videos for this channel
+            fetchRecentVideos(foundInfluencer.id);
             return;
           }
         }
@@ -96,8 +177,8 @@ const InfluencerDetailPage: React.FC = () => {
               profileImage: channel.snippet.thumbnails?.medium?.url || channel.snippet.thumbnails?.default?.url || '',
               niche: category ? category.charAt(0).toUpperCase() + category.slice(1) : 'Technology',
               platforms: {
-                youtube: { 
-                  followers: formatSubscriberCount(channel.statistics.subscriberCount || '0'), 
+                youtube: {
+                  followers: formatSubscriberCount(channel.statistics.subscriberCount || '0'),
                   handle: channel.snippet.title.replace(/\s+/g, '')
                 }
               },
@@ -106,6 +187,8 @@ const InfluencerDetailPage: React.FC = () => {
               country: channel.snippet.country
             };
             setInfluencerData(formattedData);
+            // Fetch recent videos for this channel
+            fetchRecentVideos(channel.id);
           }
         }
       } catch (error) {
@@ -131,7 +214,8 @@ const InfluencerDetailPage: React.FC = () => {
     fetchInfluencerData();
   }, [channelId, category]);
 
-  const recentPosts = [
+  // Fallback content for non-YouTube platforms or when no videos are loaded
+  const fallbackPosts = [
     {
       id: 1,
       platform: 'youtube',
@@ -253,8 +337,8 @@ const InfluencerDetailPage: React.FC = () => {
             </div>
             <h3 className="text-lg font-medium text-gray-900 mb-2">Influencer Not Found</h3>
             <p className="text-gray-500 mb-6">We couldn't find the influencer data for this profile.</p>
-            <a 
-              href="/influencerPage" 
+            <a
+              href="/influencerPage"
               className="bg-blue-600 text-white px-6 py-2 rounded-button text-sm font-medium hover:bg-blue-700 cursor-pointer whitespace-nowrap"
             >
               Back to Influencers
@@ -510,57 +594,134 @@ const InfluencerDetailPage: React.FC = () => {
                 </div>
               </div>
               <div className="text-sm text-gray-500">
-                Showing {recentPosts.length} recent posts
+                {videosLoading ? 'Loading videos...' : 
+                 recentVideos.length > 0 ? `Showing ${recentVideos.length} recent videos` : 
+                 'No recent videos found'}
               </div>
             </div>
 
             {/* Content Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {recentPosts.map((post) => (
-                <div key={post.id} className="bg-white rounded-lg shadow-sm border overflow-hidden hover:shadow-md transition-shadow cursor-pointer">
-                  <div className="relative">
-                    <img
-                      src={post.thumbnail}
-                      alt="Post thumbnail"
-                      className="w-full h-48 object-cover object-top"
-                    />
-                    <div className="absolute top-3 left-3">
-                      <div className={`flex items-center space-x-1 px-2 py-1 rounded-full text-xs font-medium ${
-                        post.platform === 'instagram' ? 'bg-pink-100 text-pink-700' :
-                        post.platform === 'youtube' ? 'bg-red-100 text-red-700' :
-                        'bg-blue-100 text-blue-700'
-                      }`}>
-                        <i className={getPlatformIcon(post.platform)}></i>
-                        <span className="capitalize">{post.type}</span>
+            {videosLoading ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {[1, 2, 3, 4, 5, 6].map((i) => (
+                  <div key={i} className="bg-white rounded-lg shadow-sm border overflow-hidden animate-pulse">
+                    <div className="w-full h-48 bg-gray-300"></div>
+                    <div className="p-4">
+                      <div className="h-4 bg-gray-300 rounded mb-2"></div>
+                      <div className="h-3 bg-gray-300 rounded mb-3"></div>
+                      <div className="flex space-x-4">
+                        <div className="h-3 bg-gray-300 rounded w-12"></div>
+                        <div className="h-3 bg-gray-300 rounded w-12"></div>
+                        <div className="h-3 bg-gray-300 rounded w-12"></div>
                       </div>
                     </div>
                   </div>
-                  <div className="p-4">
-                    <h4 className="text-sm font-semibold text-gray-900 mb-2">{post.title}</h4>
-                    <p className="text-sm text-gray-600 mb-3 line-clamp-2">{post.caption}</p>
-                    <div className="flex items-center justify-between text-xs text-gray-500 mb-2">
-                      <div className="flex items-center space-x-4">
-                        <div className="flex items-center space-x-1">
-                          <i className="fas fa-heart text-red-500"></i>
-                          <span>{formatNumber(post.likes)}</span>
+                ))}
+              </div>
+            ) : recentVideos.length > 0 ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {recentVideos
+                  .filter(video => selectedPlatform === 'all' || video.platform === selectedPlatform)
+                  .map((video) => (
+                  <div key={video.id} className="bg-white rounded-lg shadow-sm border overflow-hidden hover:shadow-md transition-shadow cursor-pointer">
+                    <div className="relative">
+                      <img
+                        src={video.thumbnail}
+                        alt="Video thumbnail"
+                        className="w-full h-48 object-cover object-center"
+                      />
+                      <div className="absolute top-3 left-3">
+                        <div className="flex items-center space-x-1 px-2 py-1 rounded-full text-xs font-medium bg-red-100 text-red-700">
+                          <i className="fab fa-youtube"></i>
+                          <span className="capitalize">{video.type}</span>
                         </div>
-                        <div className="flex items-center space-x-1">
-                          <i className="fas fa-comment text-blue-500"></i>
-                          <span>{formatNumber(post.comments)}</span>
-                        </div>
-                        {post.views && (
+                      </div>
+                      <div className="absolute bottom-3 right-3">
+                        <a 
+                          href={`https://www.youtube.com/watch?v=${video.id}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="bg-black bg-opacity-70 text-white px-2 py-1 rounded text-xs hover:bg-opacity-90"
+                        >
+                          <i className="fas fa-play mr-1"></i>
+                          Watch
+                        </a>
+                      </div>
+                    </div>
+                    <div className="p-4">
+                      <h4 className="text-sm font-semibold text-gray-900 mb-2 line-clamp-2">{video.title}</h4>
+                      <p className="text-sm text-gray-600 mb-3 line-clamp-2">{video.caption}</p>
+                      <div className="flex items-center justify-between text-xs text-gray-500 mb-2">
+                        <div className="flex items-center space-x-4">
+                          <div className="flex items-center space-x-1">
+                            <i className="fas fa-heart text-red-500"></i>
+                            <span>{formatNumber(video.likes)}</span>
+                          </div>
+                          <div className="flex items-center space-x-1">
+                            <i className="fas fa-comment text-blue-500"></i>
+                            <span>{formatNumber(video.comments)}</span>
+                          </div>
                           <div className="flex items-center space-x-1">
                             <i className="fas fa-eye text-green-500"></i>
-                            <span>{formatNumber(post.views)}</span>
+                            <span>{formatNumber(video.views)}</span>
                           </div>
-                        )}
+                        </div>
+                      </div>
+                      <div className="text-xs text-gray-400">{video.date}</div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {fallbackPosts
+                  .filter(post => selectedPlatform === 'all' || post.platform === selectedPlatform)
+                  .map((post) => (
+                  <div key={post.id} className="bg-white rounded-lg shadow-sm border overflow-hidden hover:shadow-md transition-shadow cursor-pointer">
+                    <div className="relative">
+                      <img
+                        src={post.thumbnail}
+                        alt="Post thumbnail"
+                        className="w-full h-48 object-cover object-top"
+                      />
+                      <div className="absolute top-3 left-3">
+                        <div className={`flex items-center space-x-1 px-2 py-1 rounded-full text-xs font-medium ${
+                          post.platform === 'instagram' ? 'bg-pink-100 text-pink-700' :
+                          post.platform === 'youtube' ? 'bg-red-100 text-red-700' :
+                          'bg-blue-100 text-blue-700'
+                        }`}>
+                          <i className={getPlatformIcon(post.platform)}></i>
+                          <span className="capitalize">{post.type}</span>
+                        </div>
                       </div>
                     </div>
-                    <div className="text-xs text-gray-400">{post.date}</div>
+                    <div className="p-4">
+                      <h4 className="text-sm font-semibold text-gray-900 mb-2">{post.title}</h4>
+                      <p className="text-sm text-gray-600 mb-3 line-clamp-2">{post.caption}</p>
+                      <div className="flex items-center justify-between text-xs text-gray-500 mb-2">
+                        <div className="flex items-center space-x-4">
+                          <div className="flex items-center space-x-1">
+                            <i className="fas fa-heart text-red-500"></i>
+                            <span>{formatNumber(post.likes)}</span>
+                          </div>
+                          <div className="flex items-center space-x-1">
+                            <i className="fas fa-comment text-blue-500"></i>
+                            <span>{formatNumber(post.comments)}</span>
+                          </div>
+                          {post.views && (
+                            <div className="flex items-center space-x-1">
+                              <i className="fas fa-eye text-green-500"></i>
+                              <span>{formatNumber(post.views)}</span>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                      <div className="text-xs text-gray-400">{post.date}</div>
+                    </div>
                   </div>
-                </div>
-              ))}
-            </div>
+                ))}
+              </div>
+            )}
           </div>
         )}
 
@@ -649,7 +810,7 @@ const InfluencerDetailPage: React.FC = () => {
                       </div>
                     </div>
                   </div>
-                  
+
                   <div className="pt-4 border-t">
                     <h4 className="text-sm font-medium text-gray-700 mb-2">Gender Split</h4>
                     <div className="flex items-center space-x-4">
@@ -687,7 +848,7 @@ const InfluencerDetailPage: React.FC = () => {
                       </div>
                     </div>
                   </div>
-                  
+
                   <div>
                     <h4 className="text-sm font-medium text-gray-700 mb-2">Best Days</h4>
                     <div className="flex flex-wrap gap-2">
@@ -717,7 +878,7 @@ const InfluencerDetailPage: React.FC = () => {
                       <div className="text-xs text-gray-600">6.2% engagement</div>
                     </div>
                   </div>
-                  
+
                   <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
                     <div>
                       <div className="text-sm font-medium text-gray-900">Product Comparisons</div>
@@ -728,7 +889,7 @@ const InfluencerDetailPage: React.FC = () => {
                       <div className="text-xs text-gray-600">4.8% engagement</div>
                     </div>
                   </div>
-                  
+
                   <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
                     <div>
                       <div className="text-sm font-medium text-gray-900">Tech Tips</div>
