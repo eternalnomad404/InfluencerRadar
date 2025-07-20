@@ -233,6 +233,17 @@ const InfluencerDetailPage: React.FC = () => {
     fetchInfluencerData();
   }, [channelId, category]);
 
+  // Update engagement rate when recent videos are loaded
+  useEffect(() => {
+    if (recentVideos.length > 0 && influencerData) {
+      const dynamicEngagementRate = calculateEngagementRate();
+      setInfluencerData(prev => prev ? {
+        ...prev,
+        engagementRate: dynamicEngagementRate
+      } : null);
+    }
+  }, [recentVideos]);
+
   // Fallback content for non-YouTube platforms or when no videos are loaded
   const fallbackPosts = [
     {
@@ -462,7 +473,9 @@ const InfluencerDetailPage: React.FC = () => {
                     <div className="text-sm text-gray-500">Total Followers</div>
                   </div>
                   <div className="text-center lg:text-right">
-                    <div className="text-2xl font-bold text-green-600">{influencerData.engagementRate}%</div>
+                    <div className="text-2xl font-bold text-green-600">
+                      {recentVideos.length > 0 ? calculateEngagementRate().toFixed(2) : influencerData.engagementRate}%
+                    </div>
                     <div className="text-sm text-gray-500">Avg. Engagement</div>
                   </div>
                 </div>
@@ -569,7 +582,9 @@ const InfluencerDetailPage: React.FC = () => {
                   <div className="p-4 bg-blue-50 rounded-lg">
                     <div className="flex items-center justify-between">
                       <div>
-                        <div className="text-2xl font-bold text-blue-600">5.2%</div>
+                        <div className="text-2xl font-bold text-blue-600">
+                          {recentVideos.length > 0 ? calculateEngagementRate().toFixed(1) : '5.2'}%
+                        </div>
                         <div className="text-sm text-gray-600">Engagement Rate</div>
                       </div>
                       <i className="fas fa-heart text-blue-600 text-xl"></i>
@@ -623,7 +638,9 @@ const InfluencerDetailPage: React.FC = () => {
                       <span className="text-sm font-medium">YouTube</span>
                     </div>
                     <div className="text-right">
-                      <div className="text-sm font-semibold">6.2%</div>
+                      <div className="text-sm font-semibold">
+                        {recentVideos.length > 0 ? calculateEngagementRate().toFixed(1) : '6.2'}%
+                      </div>
                       <div className="text-xs text-gray-500">Engagement</div>
                     </div>
                   </div>
@@ -1060,7 +1077,9 @@ const InfluencerDetailPage: React.FC = () => {
                   <div className="text-sm text-gray-600">Total Reach</div>
                 </div>
                 <div className="text-center p-4 bg-purple-50 rounded-lg">
-                  <div className="text-2xl font-bold text-purple-600">8.5%</div>
+                  <div className="text-2xl font-bold text-purple-600">
+                    {recentVideos.length > 0 ? calculateEngagementRate().toFixed(1) : '8.5'}%
+                  </div>
                   <div className="text-sm text-gray-600">Avg. Engagement</div>
                 </div>
               </div>
