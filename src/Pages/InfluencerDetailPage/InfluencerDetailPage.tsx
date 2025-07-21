@@ -1182,6 +1182,16 @@ const InfluencerDetailPage: React.FC = () => {
               </div>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {/* Debug Info */}
+                {(selectedPlatform === 'instagram' || selectedPlatform === 'all') && (
+                  <div className="col-span-full text-sm text-gray-600 p-4 bg-blue-50 rounded mb-4">
+                    <strong>Debug Info:</strong> Instagram posts: {instagramPosts.length}, Instagram loading: {instagramLoading.toString()}, Selected platform: {selectedPlatform}
+                    {instagramPosts.length > 0 && (
+                      <div className="mt-2">First post type: {instagramPosts[0]?.type}, shortCode: {instagramPosts[0]?.shortCode}</div>
+                    )}
+                  </div>
+                )}
+                
                 {/* YouTube Videos */}
                 {(selectedPlatform === 'all' || selectedPlatform === 'youtube') && recentVideos.map((video) => (
                   <div key={`youtube-${video.id}`} className="bg-white rounded-lg shadow-sm border overflow-hidden hover:shadow-md transition-shadow cursor-pointer">
@@ -1296,11 +1306,12 @@ const InfluencerDetailPage: React.FC = () => {
                 {(selectedPlatform === 'all' || selectedPlatform === 'instagram') && instagramPosts.map((post) => (
                   <div key={`instagram-${post.shortCode}`} className="bg-white rounded-lg shadow-sm border overflow-hidden hover:shadow-md transition-shadow cursor-pointer">
                     <div className="relative">
-                      <img
-                        src={`https://readdy.ai/api/search-image?query=instagram%20${post.type.toLowerCase()}%20social%20media%20content%20tech%20influencer&width=400&height=300&seq=${post.shortCode}&orientation=landscape`}
-                        alt="Instagram post"
-                        className="w-full h-48 object-cover object-center"
-                      />
+                      <div className="w-full h-48 bg-gradient-to-br from-pink-400 to-purple-600 flex items-center justify-center text-white">
+                        <div className="text-center">
+                          <i className="fab fa-instagram text-4xl mb-2"></i>
+                          <div className="text-sm font-medium">{post.type}</div>
+                        </div>
+                      </div>
                       <div className="absolute top-3 left-3">
                         <div className="flex items-center space-x-1 px-2 py-1 rounded-full text-xs font-medium bg-pink-100 text-pink-700">
                           <i className="fab fa-instagram"></i>
