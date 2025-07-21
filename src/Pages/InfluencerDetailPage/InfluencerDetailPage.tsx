@@ -52,7 +52,7 @@ const InfluencerDetailPage: React.FC = () => {
   const getCountryName = (countryCode: string): string => {
     const countryMap: { [key: string]: string } = {
       'US': 'United States',
-      'CA': 'Canada', 
+      'CA': 'Canada',
       'GB': 'United Kingdom',
       'UK': 'United Kingdom',
       'IN': 'India',
@@ -87,7 +87,7 @@ const InfluencerDetailPage: React.FC = () => {
       'ID': 'Indonesia',
       'VN': 'Vietnam'
     };
-    
+
     return countryMap[countryCode] || countryCode || 'Not known';
   };
 
@@ -229,7 +229,7 @@ const InfluencerDetailPage: React.FC = () => {
 
       if (commentsResponse.ok) {
         const commentsData = await commentsResponse.json();
-        
+
         if (commentsData.items) {
           const formattedComments: VideoComment[] = commentsData.items.map((item: any) => ({
             id: item.id,
@@ -248,7 +248,7 @@ const InfluencerDetailPage: React.FC = () => {
           // Cache the comments
           localStorage.setItem(cacheKey, JSON.stringify(formattedComments));
           localStorage.setItem(cacheTimeKey, Date.now().toString());
-          
+
           console.log(`Cached ${formattedComments.length} comments for video ${videoId}`);
         }
       } else {
@@ -267,20 +267,20 @@ const InfluencerDetailPage: React.FC = () => {
   // Fetch comments for all recent videos
   const fetchAllVideoComments = async () => {
     if (recentVideos.length === 0) return;
-    
+
     console.log(`Starting to fetch comments for ${recentVideos.length} videos`);
-    
+
     // Fetch comments for each video with a small delay to avoid rate limiting
     for (let i = 0; i < recentVideos.length; i++) {
       const video = recentVideos[i];
       await fetchVideoComments(video.id);
-      
+
       // Add a small delay between requests to be respectful to the API
       if (i < recentVideos.length - 1) {
         await new Promise(resolve => setTimeout(resolve, 200));
       }
     }
-    
+
     console.log('Finished fetching comments for all videos');
   };
 
@@ -504,11 +504,11 @@ const InfluencerDetailPage: React.FC = () => {
   const getCommentSentiment = (videoId: string) => {
     const comments = videoComments[videoId];
     if (!comments || comments.length === 0) return 'neutral';
-    
+
     // Placeholder logic - in the future, you can implement AI sentiment analysis here
     const totalLikes = comments.reduce((sum, comment) => sum + comment.likeCount, 0);
     const avgLikes = totalLikes / comments.length;
-    
+
     if (avgLikes > 5) return 'positive';
     if (avgLikes < 2) return 'negative';
     return 'neutral';
@@ -929,7 +929,7 @@ const InfluencerDetailPage: React.FC = () => {
                         </div>
                       </div>
                       <div className="text-xs text-gray-400">{video.date}</div>
-                      
+
                       {/* Comments Section */}
                       <div className="mt-3 border-t pt-3">
                         <div className="flex items-center justify-between mb-2">
@@ -949,14 +949,14 @@ const InfluencerDetailPage: React.FC = () => {
                             <i className="fas fa-spinner fa-spin text-xs text-gray-400"></i>
                           )}
                         </div>
-                        
+
                         <div id={`comments-${video.id}`} style={{ display: 'none' }} className="max-h-60 overflow-y-auto">
                           {videoComments[video.id] && videoComments[video.id].length > 0 ? (
                             <div className="space-y-2">
                               {videoComments[video.id].slice(0, 5).map((comment) => (
                                 <div key={comment.id} className="flex space-x-2 p-2 bg-gray-50 rounded text-xs">
-                                  <img 
-                                    src={comment.authorProfileImageUrl} 
+                                  <img
+                                    src={comment.authorProfileImageUrl}
                                     alt={comment.authorDisplayName}
                                     className="w-6 h-6 rounded-full flex-shrink-0"
                                   />

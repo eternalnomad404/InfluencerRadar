@@ -32,7 +32,7 @@ const InfluencerPage: React.FC = () => {
   const getCountryName = (countryCode: string): string => {
     const countryMap: { [key: string]: string } = {
       'US': 'United States',
-      'CA': 'Canada', 
+      'CA': 'Canada',
       'GB': 'United Kingdom',
       'UK': 'United Kingdom',
       'IN': 'India',
@@ -67,7 +67,7 @@ const InfluencerPage: React.FC = () => {
       'ID': 'Indonesia',
       'VN': 'Vietnam'
     };
-    
+
     return countryMap[countryCode] || countryCode || 'Not known';
   };
 
