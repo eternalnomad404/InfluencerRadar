@@ -43,10 +43,13 @@ class GeminiInfluencerMonitoringService implements InfluencerMonitoringService {
 
   async generateTrendBrief(influencerData: any[], timeframe: string = "48 hours"): Promise<TrendBrief> {
     try {
-      console.log('🤖 Generating trend brief with Gemini AI...');
+      console.log('🤖 Service: Generating trend brief with Gemini AI...');
+      console.log('🤖 Service: Input data:', influencerData.length, 'influencers');
+      console.log('🤖 Service: Data structure:', influencerData);
       
       // Convert influencerData to the format expected by GeminiInfluencerAgent
       const formattedData = this.formatInfluencerData(influencerData);
+      console.log('🤖 Service: Formatted data:', formattedData);
       
       // Initialize agent with data
       await this.agent.initialize(formattedData);
@@ -142,7 +145,6 @@ class GeminiInfluencerMonitoringService implements InfluencerMonitoringService {
       setTimeout(() => {
         // Analyze the provided data to generate insights
         const platforms = [...new Set(influencerData.map(inf => inf.platform || 'youtube'))];
-        const totalContent = influencerData.reduce((sum, inf) => sum + (inf.content?.length || inf.recentVideos?.length || 0), 0);
     
         resolve({
           summary: `🤖 AI-Powered Analysis: Analyzed ${influencerData.length} influencers across ${platforms.length} platforms over the past ${timeframe}. Key trends show increased focus on tech reviews, AI discussions, and mobile technology. Engagement rates are highest for video content and product unboxings.`,
@@ -239,16 +241,19 @@ export const useInfluencerMonitoring = () => {
   const [error, setError] = useState<string | null>(null);
 
   const generateTrendBrief = async (influencerData: any[], timeframe?: string) => {
+    console.log('📊 Hook: generateTrendBrief called with data:', influencerData.length, 'items');
+    console.log('📊 Hook: Influencer data structure:', influencerData);
     setLoading(true);
     setError(null);
     
     try {
       const brief = await service.generateTrendBrief(influencerData, timeframe);
+      console.log('✅ Hook: Trend brief generated successfully');
       setTrendBrief(brief);
       return brief;
     } catch (err) {
+      console.error('❌ Hook: Error generating trend brief:', err);
       setError('Failed to generate trend brief');
-      console.error('Error generating trend brief:', err);
     } finally {
       setLoading(false);
     }

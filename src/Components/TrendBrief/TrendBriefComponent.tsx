@@ -12,6 +12,9 @@ const TrendBriefComponent: React.FC<TrendBriefComponentProps> = ({
   autoRefresh = false,
   refreshInterval = 24
 }) => {
+  console.log('🎯 TrendBrief: Component rendered with data:', influencerData);
+  console.log('🎯 TrendBrief: Data length:', influencerData.length);
+  
   const { trendBrief, alerts, loading, error, generateTrendBrief, getAlerts, queryAgent } = useInfluencerMonitoring();
   const [customQuery, setCustomQuery] = useState('');
   const [queryResponse, setQueryResponse] = useState('');
@@ -81,6 +84,10 @@ const TrendBriefComponent: React.FC<TrendBriefComponentProps> = ({
   };
 
   const refreshData = () => {
+    console.log('🔄 TrendBrief: refreshData called');
+    console.log('🔄 TrendBrief: influencerData length:', influencerData.length);
+    console.log('🔄 TrendBrief: influencerData:', influencerData);
+    
     if (influencerData.length > 0) {
       if (shouldGenerateNewBrief()) {
         console.log('🔄 Manual refresh: Generating new trend brief');
@@ -90,8 +97,14 @@ const TrendBriefComponent: React.FC<TrendBriefComponentProps> = ({
       } else if (lastGeneratedAt) {
         const hoursLeft = refreshInterval - ((new Date().getTime() - lastGeneratedAt.getTime()) / (1000 * 60 * 60));
         console.log(`⏳ Refresh blocked. Next refresh available in ${hoursLeft.toFixed(1)} hours`);
-        // You could show a toast or alert here to inform the user
+        console.log('🔄 Overriding 24-hour cooldown for manual generation...');
+        // Override cooldown for manual generation
+        generateTrendBrief(influencerData);
+        getAlerts(influencerData, { engagementSpike: 2, viralContent: 100000 });
+        setLastGeneratedAt(new Date());
       }
+    } else {
+      console.log('❌ TrendBrief: No influencer data available');
     }
   };
 
@@ -163,8 +176,33 @@ const TrendBriefComponent: React.FC<TrendBriefComponentProps> = ({
           </div>
           <h3 className="text-lg font-medium text-gray-900 mb-2">AI Trend Brief</h3>
           <p className="text-gray-500 mb-4">Generate insights from influencer content using AI analysis</p>
+          
+          {/* Debug info */}
+          <div className="mb-4 p-3 bg-gray-100 rounded-lg text-xs text-left">
+            <div><strong>Debug Info:</strong></div>
+            <div>Data Length: {influencerData.length}</div>
+            <div>Loading: {loading ? 'Yes' : 'No'}</div>
+            <div>Error: {error || 'None'}</div>
+            <div>Can Generate: {influencerData.length > 0 ? 'Yes' : 'No'}</div>
+            <div>Should Generate: {shouldGenerateNewBrief() ? 'Yes' : 'No'}</div>
+            {lastGeneratedAt && (
+              <div>Last Generated: {formatDate(lastGeneratedAt)}</div>
+            )}
+            {!shouldGenerateNewBrief() && lastGeneratedAt && (
+              <div className="text-orange-600 mt-1">
+                ⚠️ Manual generation will override 24h cooldown
+              </div>
+            )}
+          </div>
+          
           <button
-            onClick={refreshData}
+            onClick={() => {
+              console.log('🎯 BUTTON CLICKED!');
+              console.log('🎯 Button click - influencerData:', influencerData);
+              console.log('🎯 Button click - loading:', loading);
+              console.log('🎯 Button click - error:', error);
+              refreshData();
+            }}
             className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
             disabled={influencerData.length === 0}
           >
