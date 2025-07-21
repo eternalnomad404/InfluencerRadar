@@ -85,7 +85,7 @@ const InfluencerDetailPage: React.FC = () => {
   // Add the hook to access AI-generated trend brief data
   const { trendBrief } = useInfluencerMonitoring();
 
-  const YOUTUBE_API_KEY = 'AIzaSyCZ1y5wlvF9Vof4eCWxBFwXTsfRGvB_K9U';
+  const YOUTUBE_API_KEY = 'AIzaSyCe_0VVgxUN_rJoKExbv5OJ3as_TN-pVrg';
 
   // Helper function to convert follower count strings to numbers for calculation
   const parseFollowerCount = (followerString: string): number => {

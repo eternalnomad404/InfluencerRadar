@@ -26,7 +26,7 @@ const InfluencerPage: React.FC = () => {
   const [influencers, setInfluencers] = useState<YouTubeInfluencer[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
 
-  const YOUTUBE_API_KEY = 'AIzaSyCZ1y5wlvF9Vof4eCWxBFwXTsfRGvB_K9U';
+  const YOUTUBE_API_KEY = 'AIzaSyCe_0VVgxUN_rJoKExbv5OJ3as_TN-pVrg';
 
   // Helper function to convert country codes to full country names
   const getCountryName = (countryCode: string): string => {
