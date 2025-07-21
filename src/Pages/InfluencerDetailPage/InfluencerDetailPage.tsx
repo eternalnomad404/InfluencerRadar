@@ -1041,7 +1041,6 @@ const InfluencerDetailPage: React.FC = () => {
               { id: 'content', label: 'Recent Content', icon: 'fas fa-images' },
               { id: 'ai-trends', label: 'AI Trend Brief', icon: 'fas fa-brain' },
               { id: 'analytics', label: 'Analytics', icon: 'fas fa-analytics' },
-              { id: 'collaborations', label: 'Brand Collabs', icon: 'fas fa-handshake' }
             ].map((tab) => (
               <button
                 key={tab.id}
@@ -1219,8 +1218,8 @@ const InfluencerDetailPage: React.FC = () => {
 
                 {/* Instagram Posts */}
                 {(selectedPlatform === 'all' || selectedPlatform === 'instagram') && instagramPosts.map((post) => (
-                  <div 
-                    key={`instagram-${post.shortCode}`} 
+                  <div
+                    key={`instagram-${post.shortCode}`}
                     className="bg-white rounded-lg shadow-sm border overflow-hidden hover:shadow-md transition-shadow cursor-pointer"
                     onClick={() => window.open(post.url, '_blank', 'noopener,noreferrer')}
                   >
@@ -1311,14 +1310,14 @@ const InfluencerDetailPage: React.FC = () => {
 
         {activeTab === 'ai-trends' && (
           <div>
-            <TrendBriefComponent 
+            <TrendBriefComponent
               influencerData={[{
                 name: influencerData?.name || 'Influencer',
                 platform: 'youtube',
                 content: recentVideos || [],
                 recentVideos: recentVideos || []
               }, ...(instagramData ? [{
-                name: influencerData?.name || 'Influencer', 
+                name: influencerData?.name || 'Influencer',
                 platform: 'instagram',
                 content: instagramPosts || [],
                 posts: instagramPosts || []
@@ -1907,7 +1906,7 @@ const InfluencerDetailPage: React.FC = () => {
                     </div>
                     <div className="text-center p-2 bg-yellow-50 rounded-lg">
                       <div className="flex items-center justify-center">
-                        <i className={`fas fa-${brand.sentiment === 'positive' ? 'smile text-green-600' : 
+                        <i className={`fas fa-${brand.sentiment === 'positive' ? 'smile text-green-600' :
                           brand.sentiment === 'negative' ? 'frown text-red-600' : 'meh text-yellow-600'} text-sm`}></i>
                       </div>
                       <div className="text-xs text-gray-600 capitalize">{brand.sentiment}</div>
@@ -1950,8 +1949,8 @@ const InfluencerDetailPage: React.FC = () => {
                 </div>
                 <div className="text-center p-4 bg-green-50 rounded-lg">
                   <div className="text-2xl font-bold text-green-600">
-                    {brandCollaborations.length > 0 
-                      ? (brandCollaborations.reduce((sum, brand) => 
+                    {brandCollaborations.length > 0
+                      ? (brandCollaborations.reduce((sum, brand) =>
                           sum + parseFloat(brand.reach.replace(/[^\d.]/g, '')), 0) / 1000).toFixed(1)
                       : '0'}M
                   </div>
@@ -1959,8 +1958,8 @@ const InfluencerDetailPage: React.FC = () => {
                 </div>
                 <div className="text-center p-4 bg-purple-50 rounded-lg">
                   <div className="text-2xl font-bold text-purple-600">
-                    {brandCollaborations.length > 0 
-                      ? (brandCollaborations.reduce((sum, brand) => 
+                    {brandCollaborations.length > 0
+                      ? (brandCollaborations.reduce((sum, brand) =>
                           sum + parseFloat(brand.engagement.replace('%', '')), 0) / brandCollaborations.length).toFixed(1)
                       : '0'}%
                   </div>
@@ -1968,7 +1967,7 @@ const InfluencerDetailPage: React.FC = () => {
                 </div>
                 <div className="text-center p-4 bg-yellow-50 rounded-lg">
                   <div className="text-2xl font-bold text-yellow-600">
-                    {brandCollaborations.length > 0 
+                    {brandCollaborations.length > 0
                       ? Math.round((brandCollaborations.filter(brand => brand.sentiment === 'positive').length / brandCollaborations.length) * 100)
                       : '0'}%
                   </div>
