@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import Navigation from '../../Components/Navigation/Navigation';
 import Footer from '../../Components/Footer/Footer';
+import TrendBriefComponent from '../../Components/TrendBrief/TrendBriefComponent';
 
 interface InfluencerData {
   id: string;
@@ -1026,6 +1027,7 @@ const InfluencerDetailPage: React.FC = () => {
             {[
               { id: 'overview', label: 'Overview', icon: 'fas fa-chart-line' },
               { id: 'content', label: 'Recent Content', icon: 'fas fa-images' },
+              { id: 'ai-trends', label: 'AI Trend Brief', icon: 'fas fa-brain' },
               { id: 'analytics', label: 'Analytics', icon: 'fas fa-analytics' },
               { id: 'collaborations', label: 'Brand Collabs', icon: 'fas fa-handshake' }
             ].map((tab) => (
@@ -1381,6 +1383,26 @@ const InfluencerDetailPage: React.FC = () => {
                 )}
               </div>
             )}
+          </div>
+        )}
+
+        {activeTab === 'ai-trends' && (
+          <div>
+            <TrendBriefComponent 
+              influencerData={[{
+                name: influencerData?.name || 'Influencer',
+                platform: 'youtube',
+                content: recentVideos || [],
+                recentVideos: recentVideos || []
+              }, ...(instagramData ? [{
+                name: influencerData?.name || 'Influencer', 
+                platform: 'instagram',
+                content: instagramPosts || [],
+                posts: instagramPosts || []
+              }] : [])]}
+              autoRefresh={true}
+              refreshInterval={24}
+            />
           </div>
         )}
 
