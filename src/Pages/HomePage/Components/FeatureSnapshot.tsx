@@ -7,7 +7,7 @@ const FeatureSnapshot = () => {
               <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-8">
                 Everything You Need to Stay Ahead
               </h2>
-              
+
               <div className="space-y-6">
                 <div className="flex items-start space-x-4">
                   <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center flex-shrink-0">
@@ -52,7 +52,7 @@ const FeatureSnapshot = () => {
             </div>
 
             <div className="relative">
-              <img 
+              <img
                 src="https://readdy.ai/api/search-image?query=Modern%20analytics%20dashboard%20interface%20showing%20social%20media%20monitoring%20tools%20with%20charts%20graphs%20and%20influencer%20tracking%20data%20displayed%20on%20computer%20screen%20with%20clean%20professional%20design%20and%20blue%20color%20scheme&width=600&height=500&seq=features-dashboard-001&orientation=landscape"
                 alt="Features Dashboard"
                 className="w-full h-auto object-cover object-top rounded-2xl shadow-2xl"

@@ -1270,40 +1270,50 @@ const InfluencerDetailPage: React.FC = () => {
         )}
 
         {activeTab === 'analytics' && (
-          <div className="space-y-8">
-            {/* Performance Overview */}
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-              <div className="bg-white rounded-lg shadow-sm border p-6 text-center">
-                <div className="text-3xl font-bold text-blue-600">{calculateEngagementRate().toFixed(2)}%</div>
-                <div className="text-sm text-gray-600">Avg. Engagement Rate</div>
-                <div className="text-xs text-green-600 mt-1">Based on recent videos</div>
+          <div className="space-y-16">
+            {/* YouTube Channel Overview */}
+            <div className="space-y-8">
+              <div className="flex items-center justify-between">
+                <h2 className="text-2xl font-bold text-gray-900">
+                  <i className="fab fa-youtube text-red-600 mr-3"></i>
+                  YouTube Channel Overview
+                </h2>
+                <div className="text-sm text-gray-500">
+                  Real-time data from YouTube API
+                </div>
               </div>
-              <div className="bg-white rounded-lg shadow-sm border p-6 text-center">
-                <div className="text-3xl font-bold text-green-600">{channelStats ? formatNumber(channelStats.viewCount) : 'N/A'}</div>
-                <div className="text-sm text-gray-600">Total Channel Views</div>
-                <div className="text-xs text-gray-500 mt-1">All-time views</div>
-              </div>
-              <div className="bg-white rounded-lg shadow-sm border p-6 text-center">
-                <div className="text-3xl font-bold text-purple-600">{formatNumber(calculateAverageViews())}</div>
-                <div className="text-sm text-gray-600">Avg. Video Views</div>
-                <div className="text-xs text-gray-500 mt-1">Recent videos average</div>
-              </div>
-              <div className="bg-white rounded-lg shadow-sm border p-6 text-center">
-                <div className="text-3xl font-bold text-orange-600">{channelStats ? formatNumber(channelStats.videoCount) : 'N/A'}</div>
-                <div className="text-sm text-gray-600">Total Videos</div>
-                <div className="text-xs text-gray-500 mt-1">Channel lifetime</div>
-              </div>
-            </div>
 
-            {/* YouTube Channel Statistics */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+              {/* YouTube Performance Overview */}
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+                <div className="bg-white rounded-lg shadow-sm border p-6 text-center">
+                  <div className="text-3xl font-bold text-blue-600">{calculateEngagementRate().toFixed(2)}%</div>
+                  <div className="text-sm text-gray-600">Avg. Engagement Rate</div>
+                  <div className="text-xs text-green-600 mt-1">Based on recent videos</div>
+                </div>
+                <div className="bg-white rounded-lg shadow-sm border p-6 text-center">
+                  <div className="text-3xl font-bold text-green-600">{channelStats ? formatNumber(channelStats.viewCount) : 'N/A'}</div>
+                  <div className="text-sm text-gray-600">Total Channel Views</div>
+                  <div className="text-xs text-gray-500 mt-1">All-time views</div>
+                </div>
+                <div className="bg-white rounded-lg shadow-sm border p-6 text-center">
+                  <div className="text-3xl font-bold text-purple-600">{formatNumber(calculateAverageViews())}</div>
+                  <div className="text-sm text-gray-600">Avg. Video Views</div>
+                  <div className="text-xs text-gray-500 mt-1">Recent videos average</div>
+                </div>
+                <div className="bg-white rounded-lg shadow-sm border p-6 text-center">
+                  <div className="text-3xl font-bold text-orange-600">{channelStats ? formatNumber(channelStats.videoCount) : 'N/A'}</div>
+                  <div className="text-sm text-gray-600">Total Videos</div>
+                  <div className="text-xs text-gray-500 mt-1">Channel lifetime</div>
+                </div>
+              </div>
+
               {/* Channel Performance Metrics */}
               <div className="bg-white rounded-lg shadow-sm border p-6">
                 <h3 className="text-lg font-semibold text-gray-900 mb-4">
                   <i className="fab fa-youtube text-red-600 mr-2"></i>
-                  Channel Performance
+                  Channel Performance Metrics
                 </h3>
-                <div className="space-y-4">
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
                   <div className="flex items-center justify-between p-3 bg-red-50 rounded-lg">
                     <div>
                       <div className="text-sm font-medium text-gray-900">Channel Age</div>
@@ -1342,204 +1352,234 @@ const InfluencerDetailPage: React.FC = () => {
                   </div>
                 </div>
               </div>
+            </div>
 
-              {/* Recent Video Performance */}
-              <div className="bg-white rounded-lg shadow-sm border p-6">
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">Recent Video Analytics</h3>
-                <div className="space-y-4">
-                  {recentVideos.length > 0 ? (
-                    <>
-                      <div className="text-sm text-gray-600 mb-3">Performance metrics from last {recentVideos.length} videos</div>
-
-                      <div className="grid grid-cols-3 gap-3 text-center">
-                        <div className="p-3 bg-yellow-50 rounded-lg">
-                          <div className="text-lg font-semibold text-yellow-600">
-                            {formatNumber(Math.max(...recentVideos.map(v => v.views)))}
-                          </div>
-                          <div className="text-xs text-gray-600">Highest Views</div>
-                        </div>
-                        <div className="p-3 bg-red-50 rounded-lg">
-                          <div className="text-lg font-semibold text-red-600">
-                            {formatNumber(Math.max(...recentVideos.map(v => v.likes)))}
-                          </div>
-                          <div className="text-xs text-gray-600">Most Likes</div>
-                        </div>
-                        <div className="p-3 bg-blue-50 rounded-lg">
-                          <div className="text-lg font-semibold text-blue-600">
-                            {formatNumber(Math.max(...recentVideos.map(v => v.comments)))}
-                          </div>
-                          <div className="text-xs text-gray-600">Most Comments</div>
-                        </div>
-                      </div>
-
-                      {getBestPerformingVideo() && (
-                        <div className="mt-4 p-3 bg-gradient-to-r from-yellow-50 to-orange-50 rounded-lg border">
-                          <div className="text-sm font-medium text-gray-900 mb-1">🏆 Best Performing Recent Video</div>
-                          <div className="text-sm text-gray-700 font-medium">{getBestPerformingVideo()?.title}</div>
-                          <div className="text-xs text-gray-500 mt-1">
-                            {formatNumber(getBestPerformingVideo()?.views || 0)} views •
-                            {formatNumber(getBestPerformingVideo()?.likes || 0)} likes •
-                            {getBestPerformingVideo()?.date}
-                          </div>
-                        </div>
-                      )}
-                    </>
-                  ) : (
-                    <div className="text-center text-gray-500 py-8">
-                      <i className="fas fa-video text-3xl mb-2"></i>
-                      <div className="text-sm">No recent video data available</div>
-                    </div>
-                  )}
+            {/* YouTube Content Performance */}
+            <div className="space-y-8">
+              <div className="flex items-center justify-between">
+                <h2 className="text-2xl font-bold text-gray-900">
+                  <i className="fas fa-play-circle text-red-600 mr-3"></i>
+                  YouTube Content Performance
+                </h2>
+                <div className="text-sm text-gray-500">
+                  Video-specific analytics and insights
                 </div>
               </div>
 
-              {/* Engagement Breakdown */}
-              <div className="bg-white rounded-lg shadow-sm border p-6">
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">Engagement Breakdown</h3>
-                {recentVideos.length > 0 ? (
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                {/* Recent Video Performance */}
+                <div className="bg-white rounded-lg shadow-sm border p-6">
+                  <h3 className="text-lg font-semibold text-gray-900 mb-4">Recent Video Analytics</h3>
                   <div className="space-y-4">
-                    <div>
-                      <h4 className="text-sm font-medium text-gray-700 mb-2">Average Engagement per Video</h4>
-                      <div className="space-y-2">
-                        <div className="flex items-center justify-between">
-                          <span className="text-sm text-gray-600">Likes</span>
-                          <span className="text-sm font-medium">
-                            {formatNumber(Math.round(recentVideos.reduce((sum, v) => sum + v.likes, 0) / recentVideos.length))}
-                          </span>
-                        </div>
-                        <div className="flex items-center justify-between">
-                          <span className="text-sm text-gray-600">Comments</span>
-                          <span className="text-sm font-medium">
-                            {formatNumber(Math.round(recentVideos.reduce((sum, v) => sum + v.comments, 0) / recentVideos.length))}
-                          </span>
-                        </div>
-                        <div className="flex items-center justify-between">
-                          <span className="text-sm text-gray-600">Like-to-View Ratio</span>
-                          <span className="text-sm font-medium">
-                            {(recentVideos.reduce((sum, v) => sum + (v.views > 0 ? v.likes / v.views : 0), 0) / recentVideos.length * 100).toFixed(2)}%
-                          </span>
-                        </div>
-                        <div className="flex items-center justify-between">
-                          <span className="text-sm text-gray-600">Comment-to-View Ratio</span>
-                          <span className="text-sm font-medium">
-                            {(recentVideos.reduce((sum, v) => sum + (v.views > 0 ? v.comments / v.views : 0), 0) / recentVideos.length * 100).toFixed(3)}%
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                ) : (
-                  <div className="text-center text-gray-500 py-4">
-                    <div className="text-sm">No engagement data available</div>
-                  </div>
-                )}
-              </div>
+                    {recentVideos.length > 0 ? (
+                      <>
+                        <div className="text-sm text-gray-600 mb-3">Performance metrics from last {recentVideos.length} videos</div>
 
-              {/* Channel Growth Metrics */}
-              <div className="bg-white rounded-lg shadow-sm border p-6">
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">Growth Metrics</h3>
-                <div className="space-y-4">
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="text-center p-4 bg-indigo-50 rounded-lg">
-                      <div className="text-2xl font-bold text-indigo-600">
-                        {channelStats ? (channelStats.videoCount > 0 ? Math.round(channelStats.viewCount / channelStats.videoCount / 1000) + 'K' : 'N/A') : 'N/A'}
-                      </div>
-                      <div className="text-xs text-gray-600 mt-1">Avg Views/Video</div>
-                    </div>
-                    <div className="text-center p-4 bg-pink-50 rounded-lg">
-                      <div className="text-2xl font-bold text-pink-600">
-                        {channelStats ? (channelStats.videoCount > 0 ? Math.round(channelStats.subscriberCount / channelStats.videoCount) : 'N/A') : 'N/A'}
-                      </div>
-                      <div className="text-xs text-gray-600 mt-1">Subs per Video</div>
-                    </div>
-                  </div>
+                        <div className="grid grid-cols-3 gap-3 text-center">
+                          <div className="p-3 bg-yellow-50 rounded-lg">
+                            <div className="text-lg font-semibold text-yellow-600">
+                              {formatNumber(Math.max(...recentVideos.map(v => v.views)))}
+                            </div>
+                            <div className="text-xs text-gray-600">Highest Views</div>
+                          </div>
+                          <div className="p-3 bg-red-50 rounded-lg">
+                            <div className="text-lg font-semibold text-red-600">
+                              {formatNumber(Math.max(...recentVideos.map(v => v.likes)))}
+                            </div>
+                            <div className="text-xs text-gray-600">Most Likes</div>
+                          </div>
+                          <div className="p-3 bg-blue-50 rounded-lg">
+                            <div className="text-lg font-semibold text-blue-600">
+                              {formatNumber(Math.max(...recentVideos.map(v => v.comments)))}
+                            </div>
+                            <div className="text-xs text-gray-600">Most Comments</div>
+                          </div>
+                        </div>
 
-                  <div className="pt-4 border-t">
-                    <h4 className="text-sm font-medium text-gray-700 mb-3">Content Strategy Insights</h4>
-                    <div className="space-y-2 text-sm">
-                      <div className="flex items-center justify-between">
-                        <span className="text-gray-600">Upload Consistency</span>
-                        <span className={`px-2 py-1 rounded-full text-xs ${
-                          calculateUploadFrequency() === 'Daily' || calculateUploadFrequency() === '2-3 times/week'
-                            ? 'bg-green-100 text-green-700'
-                            : calculateUploadFrequency() === 'Weekly'
-                            ? 'bg-yellow-100 text-yellow-700'
-                            : 'bg-gray-100 text-gray-700'
-                        }`}>
-                          {calculateUploadFrequency()}
-                        </span>
+                        {getBestPerformingVideo() && (
+                          <div className="mt-4 p-3 bg-gradient-to-r from-yellow-50 to-orange-50 rounded-lg border">
+                            <div className="text-sm font-medium text-gray-900 mb-1">🏆 Best Performing Recent Video</div>
+                            <div className="text-sm text-gray-700 font-medium">{getBestPerformingVideo()?.title}</div>
+                            <div className="text-xs text-gray-500 mt-1">
+                              {formatNumber(getBestPerformingVideo()?.views || 0)} views •
+                              {formatNumber(getBestPerformingVideo()?.likes || 0)} likes •
+                              {getBestPerformingVideo()?.date}
+                            </div>
+                          </div>
+                        )}
+                      </>
+                    ) : (
+                      <div className="text-center text-gray-500 py-8">
+                        <i className="fas fa-video text-3xl mb-2"></i>
+                        <div className="text-sm">No recent video data available</div>
                       </div>
-                      <div className="flex items-center justify-between">
-                        <span className="text-gray-600">Engagement Quality</span>
-                        <span className={`px-2 py-1 rounded-full text-xs ${
-                          calculateEngagementRate() > 3
-                            ? 'bg-green-100 text-green-700'
-                            : calculateEngagementRate() > 1
-                            ? 'bg-yellow-100 text-yellow-700'
-                            : 'bg-red-100 text-red-700'
-                        }`}>
-                          {calculateEngagementRate() > 3 ? 'Excellent' :
-                           calculateEngagementRate() > 1 ? 'Good' : 'Needs Improvement'}
-                        </span>
+                    )}
+                  </div>
+                </div>
+
+                {/* Channel Growth Metrics */}
+                <div className="bg-white rounded-lg shadow-sm border p-6">
+                  <h3 className="text-lg font-semibold text-gray-900 mb-4">Growth Metrics</h3>
+                  <div className="space-y-4">
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="text-center p-4 bg-indigo-50 rounded-lg">
+                        <div className="text-2xl font-bold text-indigo-600">
+                          {channelStats ? (channelStats.videoCount > 0 ? Math.round(channelStats.viewCount / channelStats.videoCount / 1000) + 'K' : 'N/A') : 'N/A'}
+                        </div>
+                        <div className="text-xs text-gray-600 mt-1">Avg Views/Video</div>
+                      </div>
+                      <div className="text-center p-4 bg-pink-50 rounded-lg">
+                        <div className="text-2xl font-bold text-pink-600">
+                          {channelStats ? (channelStats.videoCount > 0 ? Math.round(channelStats.subscriberCount / channelStats.videoCount) : 'N/A') : 'N/A'}
+                        </div>
+                        <div className="text-xs text-gray-600 mt-1">Subs per Video</div>
+                      </div>
+                    </div>
+
+                    <div className="pt-4 border-t">
+                      <h4 className="text-sm font-medium text-gray-700 mb-3">Content Strategy Insights</h4>
+                      <div className="space-y-2 text-sm">
+                        <div className="flex items-center justify-between">
+                          <span className="text-gray-600">Upload Consistency</span>
+                          <span className={`px-2 py-1 rounded-full text-xs ${
+                            calculateUploadFrequency() === 'Daily' || calculateUploadFrequency() === '2-3 times/week'
+                              ? 'bg-green-100 text-green-700'
+                              : calculateUploadFrequency() === 'Weekly'
+                              ? 'bg-yellow-100 text-yellow-700'
+                              : 'bg-gray-100 text-gray-700'
+                          }`}>
+                            {calculateUploadFrequency()}
+                          </span>
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <span className="text-gray-600">Engagement Quality</span>
+                          <span className={`px-2 py-1 rounded-full text-xs ${
+                            calculateEngagementRate() > 3
+                              ? 'bg-green-100 text-green-700'
+                              : calculateEngagementRate() > 1
+                              ? 'bg-yellow-100 text-yellow-700'
+                              : 'bg-red-100 text-red-700'
+                          }`}>
+                            {calculateEngagementRate() > 3 ? 'Excellent' :
+                             calculateEngagementRate() > 1 ? 'Good' : 'Needs Improvement'}
+                          </span>
+                        </div>
                       </div>
                     </div>
                   </div>
                 </div>
               </div>
+            </div>
 
-              {/* Comment Analytics */}
-              <div className="bg-white rounded-lg shadow-sm border p-6">
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">
-                  <i className="fas fa-comments text-blue-600 mr-2"></i>
-                  Comment Analytics
-                </h3>
-                <div className="space-y-4">
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="text-center p-4 bg-blue-50 rounded-lg">
-                      <div className="text-2xl font-bold text-blue-600">
-                        {getTotalCommentsCount()}
-                      </div>
-                      <div className="text-xs text-gray-600 mt-1">Total Comments Stored</div>
-                    </div>
-                    <div className="text-center p-4 bg-green-50 rounded-lg">
-                      <div className="text-2xl font-bold text-green-600">
-                        {recentVideos.length > 0 ? Math.round(getTotalCommentsCount() / recentVideos.length) : 0}
-                      </div>
-                      <div className="text-xs text-gray-600 mt-1">Avg Comments/Video</div>
-                    </div>
-                  </div>
+            {/* YouTube Engagement Analytics */}
+            <div className="space-y-8">
+              <div className="flex items-center justify-between">
+                <h2 className="text-2xl font-bold text-gray-900">
+                  <i className="fas fa-heart text-red-600 mr-3"></i>
+                  YouTube Engagement Analytics
+                </h2>
+                <div className="text-sm text-gray-500">
+                  Detailed interaction and comment analytics
+                </div>
+              </div>
 
-                  <div className="pt-4 border-t">
-                    <h4 className="text-sm font-medium text-gray-700 mb-3">Comment Analysis Ready</h4>
-                    <div className="space-y-2 text-sm">
-                      <div className="flex items-center justify-between">
-                        <span className="text-gray-600">Videos with Comments</span>
-                        <span className="text-green-600 font-medium">
-                          {Object.keys(videoComments).filter(videoId => videoComments[videoId].length > 0).length} / {recentVideos.length}
-                        </span>
-                      </div>
-                      <div className="flex items-center justify-between">
-                        <span className="text-gray-600">AI Analysis Status</span>
-                        <span className="px-2 py-1 rounded-full text-xs bg-yellow-100 text-yellow-700">
-                          Ready for Processing
-                        </span>
-                      </div>
-                      <div className="flex items-center justify-between">
-                        <span className="text-gray-600">Data Collection</span>
-                        <span className="px-2 py-1 rounded-full text-xs bg-green-100 text-green-700">
-                          {getTotalCommentsCount() > 0 ? 'Complete' : 'In Progress'}
-                        </span>
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                {/* Engagement Breakdown */}
+                <div className="bg-white rounded-lg shadow-sm border p-6">
+                  <h3 className="text-lg font-semibold text-gray-900 mb-4">Engagement Breakdown</h3>
+                  {recentVideos.length > 0 ? (
+                    <div className="space-y-4">
+                      <div>
+                        <h4 className="text-sm font-medium text-gray-700 mb-2">Average Engagement per Video</h4>
+                        <div className="space-y-2">
+                          <div className="flex items-center justify-between">
+                            <span className="text-sm text-gray-600">Likes</span>
+                            <span className="text-sm font-medium">
+                              {formatNumber(Math.round(recentVideos.reduce((sum, v) => sum + v.likes, 0) / recentVideos.length))}
+                            </span>
+                          </div>
+                          <div className="flex items-center justify-between">
+                            <span className="text-sm text-gray-600">Comments</span>
+                            <span className="text-sm font-medium">
+                              {formatNumber(Math.round(recentVideos.reduce((sum, v) => sum + v.comments, 0) / recentVideos.length))}
+                            </span>
+                          </div>
+                          <div className="flex items-center justify-between">
+                            <span className="text-sm text-gray-600">Like-to-View Ratio</span>
+                            <span className="text-sm font-medium">
+                              {(recentVideos.reduce((sum, v) => sum + (v.views > 0 ? v.likes / v.views : 0), 0) / recentVideos.length * 100).toFixed(2)}%
+                            </span>
+                          </div>
+                          <div className="flex items-center justify-between">
+                            <span className="text-sm text-gray-600">Comment-to-View Ratio</span>
+                            <span className="text-sm font-medium">
+                              {(recentVideos.reduce((sum, v) => sum + (v.views > 0 ? v.comments / v.views : 0), 0) / recentVideos.length * 100).toFixed(3)}%
+                            </span>
+                          </div>
+                        </div>
                       </div>
                     </div>
-                  </div>
-
-                  {getTotalCommentsCount() > 0 && (
-                    <div className="pt-4 border-t">
-                      <div className="text-xs text-gray-500 text-center">
-                        💡 Comment data is stored and ready for AI sentiment analysis, engagement pattern detection, and audience insight generation.
-                      </div>
+                  ) : (
+                    <div className="text-center text-gray-500 py-4">
+                      <div className="text-sm">No engagement data available</div>
                     </div>
                   )}
+                </div>
+
+                {/* Comment Analytics */}
+                <div className="bg-white rounded-lg shadow-sm border p-6">
+                  <h3 className="text-lg font-semibold text-gray-900 mb-4">
+                    <i className="fas fa-comments text-blue-600 mr-2"></i>
+                    Comment Analytics
+                  </h3>
+                  <div className="space-y-4">
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="text-center p-4 bg-blue-50 rounded-lg">
+                        <div className="text-2xl font-bold text-blue-600">
+                          {getTotalCommentsCount()}
+                        </div>
+                        <div className="text-xs text-gray-600 mt-1">Total Comments Stored</div>
+                      </div>
+                      <div className="text-center p-4 bg-green-50 rounded-lg">
+                        <div className="text-2xl font-bold text-green-600">
+                          {recentVideos.length > 0 ? Math.round(getTotalCommentsCount() / recentVideos.length) : 0}
+                        </div>
+                        <div className="text-xs text-gray-600 mt-1">Avg Comments/Video</div>
+                      </div>
+                    </div>
+
+                    <div className="pt-4 border-t">
+                      <h4 className="text-sm font-medium text-gray-700 mb-3">Comment Analysis Ready</h4>
+                      <div className="space-y-2 text-sm">
+                        <div className="flex items-center justify-between">
+                          <span className="text-gray-600">Videos with Comments</span>
+                          <span className="text-green-600 font-medium">
+                            {Object.keys(videoComments).filter(videoId => videoComments[videoId].length > 0).length} / {recentVideos.length}
+                          </span>
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <span className="text-gray-600">AI Analysis Status</span>
+                          <span className="px-2 py-1 rounded-full text-xs bg-yellow-100 text-yellow-700">
+                            Ready for Processing
+                          </span>
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <span className="text-gray-600">Data Collection</span>
+                          <span className="px-2 py-1 rounded-full text-xs bg-green-100 text-green-700">
+                            {getTotalCommentsCount() > 0 ? 'Complete' : 'In Progress'}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+
+                    {getTotalCommentsCount() > 0 && (
+                      <div className="pt-4 border-t">
+                        <div className="text-xs text-gray-500 text-center">
+                          💡 Comment data is stored and ready for AI sentiment analysis, engagement pattern detection, and audience insight generation.
+                        </div>
+                      </div>
+                    )}
+                  </div>
                 </div>
               </div>
             </div>
