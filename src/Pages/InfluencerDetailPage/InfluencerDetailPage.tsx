@@ -69,7 +69,6 @@ const InfluencerDetailPage: React.FC = () => {
   const { channelId, category } = useParams<{ channelId: string; category: string }>();
   const [activeTab, setActiveTab] = useState('overview');
   const [selectedPlatform, setSelectedPlatform] = useState('all');
-  const [timeRange, setTimeRange] = useState('30');
   const [influencerData, setInfluencerData] = useState<InfluencerData | null>(null);
   const [loading, setLoading] = useState(true);
   const [recentVideos, setRecentVideos] = useState<any[]>([]);
@@ -82,6 +81,47 @@ const InfluencerDetailPage: React.FC = () => {
   const [instagramLoading, setInstagramLoading] = useState(false);
 
   const YOUTUBE_API_KEY = 'AIzaSyCZ1y5wlvF9Vof4eCWxBFwXTsfRGvB_K9U';
+
+  // Helper function to convert follower count strings to numbers for calculation
+  const parseFollowerCount = (followerString: string): number => {
+    if (!followerString) return 0;
+    const cleanString = followerString.replace(/[^\d.MKmk]/g, '');
+    const num = parseFloat(cleanString);
+
+    if (cleanString.toLowerCase().includes('m')) {
+      return num * 1000000;
+    } else if (cleanString.toLowerCase().includes('k')) {
+      return num * 1000;
+    }
+    return num;
+  };
+
+  // Helper function to format numbers back to readable format
+  const formatFollowerCount = (count: number): string => {
+    if (count >= 1000000) {
+      return (count / 1000000).toFixed(1) + 'M';
+    } else if (count >= 1000) {
+      return (count / 1000).toFixed(1) + 'K';
+    }
+    return count.toString();
+  };
+
+  // Function to calculate and update total followers from all platforms
+  const calculateTotalFollowers = () => {
+    let totalCount = 0;
+
+    // Add YouTube followers
+    if (influencerData?.platforms?.youtube?.followers) {
+      totalCount += parseFollowerCount(influencerData.platforms.youtube.followers);
+    }
+
+    // Add Instagram followers if available
+    if (instagramData?.followersCount) {
+      totalCount += instagramData.followersCount;
+    }
+
+    return formatFollowerCount(totalCount);
+  };
 
   // Helper function to convert country codes to full country names
   const getCountryName = (countryCode: string): string => {
@@ -426,6 +466,33 @@ const InfluencerDetailPage: React.FC = () => {
         if (matchingInfluencer) {
           setInstagramData(matchingInfluencer);
 
+          // Update influencer data to include Instagram platform info
+          let totalCount = 0;
+          if (influencerData) {
+            const updatedInfluencerData = {
+              ...influencerData,
+              platforms: {
+                ...influencerData.platforms,
+                instagram: {
+                  followers: formatFollowerCount(matchingInfluencer.followersCount),
+                  handle: matchingInfluencer.username
+                }
+              }
+            };
+
+            // Calculate total followers from both platforms
+            if (updatedInfluencerData.platforms.youtube?.followers) {
+              totalCount += parseFollowerCount(updatedInfluencerData.platforms.youtube.followers);
+            }
+            totalCount += matchingInfluencer.followersCount;
+
+            updatedInfluencerData.totalFollowers = formatFollowerCount(totalCount);
+
+            setInfluencerData(updatedInfluencerData);
+          } else {
+            totalCount = matchingInfluencer.followersCount;
+          }
+
           // Combine IGTV videos and regular posts
           const allPosts = [
             ...(matchingInfluencer.latestIgtvVideos || []),
@@ -437,6 +504,7 @@ const InfluencerDetailPage: React.FC = () => {
           console.log(`✅ Loaded Instagram data for ${matchingInfluencer.fullName} (@${matchingInfluencer.username})`);
           console.log(`📊 Found ${allPosts.length} total posts, showing ${Math.min(allPosts.length, 12)} recent posts`);
           console.log(`👥 ${matchingInfluencer.followersCount.toLocaleString()} followers`);
+          console.log(`🔢 Updated total followers: ${formatFollowerCount(totalCount)}`);
         } else {
           console.log(`❌ No Instagram data found for username: ${instagramUsername}`);
           console.log(`Available usernames:`, influencers.map((inf: any) => inf.username));
@@ -843,18 +911,109 @@ const InfluencerDetailPage: React.FC = () => {
                   </div>
                 </div>
 
-                {/* Key Metrics */}
-                <div className="mt-6 lg:mt-0 grid grid-cols-2 gap-6 lg:block lg:space-y-4">
-                  <div className="text-center lg:text-right">
-                    <div className="text-2xl font-bold text-gray-900">{influencerData.totalFollowers}</div>
-                    <div className="text-sm text-gray-500">Total Followers</div>
-                  </div>
-                  <div className="text-center lg:text-right">
-                    <div className="text-2xl font-bold text-green-600">
-                      {recentVideos.length > 0 ? calculateEngagementRate().toFixed(2) : influencerData.engagementRate}%
+                {/* Key Metrics - Cross Platform Performance */}
+                <div className="mt-6 lg:mt-0 bg-gray-50 rounded-xl p-6 min-w-[400px]">
+                  {/* Total Combined Metrics */}
+                  <div className="text-center mb-6 pb-4 border-b border-gray-200">
+                    <div className="text-3xl font-bold text-gray-900 mb-1">
+                      {instagramData ? calculateTotalFollowers() : influencerData.totalFollowers}
                     </div>
-                    <div className="text-sm text-gray-500">Avg. Engagement</div>
+                    <div className="text-sm text-gray-600 font-medium">Total Followers</div>
                   </div>
+
+                  {/* Platform Metrics Container - Side by Side */}
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-5">
+                    {/* YouTube Metrics */}
+                    <div className="bg-white rounded-lg p-4 shadow-sm border border-gray-100">
+                      <div className="flex items-center space-x-2 mb-3">
+                        <div className="w-8 h-8 bg-red-50 rounded-lg flex items-center justify-center">
+                          <i className="fab fa-youtube text-red-600 text-sm"></i>
+                        </div>
+                        <span className="text-sm font-semibold text-gray-700">YouTube</span>
+                      </div>
+                      <div className="space-y-3">
+                        <div className="text-center">
+                          <div className="text-lg font-bold text-red-600 mb-1">
+                            {influencerData.platforms?.youtube?.followers || 'N/A'}
+                          </div>
+                          <div className="text-xs text-gray-500">Followers</div>
+                        </div>
+                        <div className="grid grid-cols-2 gap-2">
+                          <div className="text-center">
+                            <div className="text-sm font-bold text-red-600 mb-1">
+                              {recentVideos.length > 0 ? calculateEngagementRate().toFixed(1) : influencerData.engagementRate || '5.1'}%
+                            </div>
+                            <div className="text-xs text-gray-500">Engagement</div>
+                          </div>
+                          <div className="text-center">
+                            <div className="text-sm font-bold text-red-600 mb-1">
+                              {recentVideos.length > 0 ? formatNumber(calculateAverageViews()) : 'N/A'}
+                            </div>
+                            <div className="text-xs text-gray-500">Avg Views</div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Instagram Metrics */}
+                    {instagramData ? (
+                      <div className="bg-white rounded-lg p-4 shadow-sm border border-gray-100">
+                        <div className="flex items-center space-x-2 mb-3">
+                          <div className="w-8 h-8 bg-pink-50 rounded-lg flex items-center justify-center">
+                            <i className="fab fa-instagram text-pink-600 text-sm"></i>
+                          </div>
+                          <span className="text-sm font-semibold text-gray-700">Instagram</span>
+                        </div>
+                        <div className="space-y-3">
+                          <div className="text-center">
+                            <div className="text-lg font-bold text-pink-600 mb-1">
+                              {formatNumber(instagramData.followersCount)}
+                            </div>
+                            <div className="text-xs text-gray-500">Followers</div>
+                          </div>
+                          <div className="grid grid-cols-2 gap-2">
+                            <div className="text-center">
+                              <div className="text-sm font-bold text-pink-600 mb-1">
+                                {calculateInstagramEngagementRate().toFixed(1)}%
+                              </div>
+                              <div className="text-xs text-gray-500">Engagement</div>
+                            </div>
+                            <div className="text-center">
+                              <div className="text-sm font-bold text-pink-600 mb-1">
+                                {formatNumber(getAverageInstagramLikes())}
+                              </div>
+                              <div className="text-xs text-gray-500">Avg Likes</div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="bg-gray-100 rounded-lg p-4 border border-gray-200 flex items-center justify-center">
+                        <div className="text-center">
+                          <i className="fab fa-instagram text-gray-400 text-2xl mb-2"></i>
+                          <div className="text-sm text-gray-500">Instagram data loading...</div>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Cross-Platform Performance Indicator */}
+                  {instagramData && (
+                    <div className="bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg p-4 border border-blue-100">
+                      <div className="text-center">
+                        <div className="flex items-center justify-center space-x-2 mb-2">
+                          <div className="w-6 h-6 bg-blue-100 rounded-full flex items-center justify-center">
+                            <i className="fas fa-chart-line text-blue-600 text-xs"></i>
+                          </div>
+                          <span className="text-sm font-semibold text-gray-700">Cross-Platform Score</span>
+                        </div>
+                        <div className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mb-1">
+                          {Math.round((calculateEngagementRate() + calculateInstagramEngagementRate()) / 2 * 10) / 10}%
+                        </div>
+                        <div className="text-xs text-gray-600 font-medium">Combined Engagement</div>
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
@@ -942,59 +1101,10 @@ const InfluencerDetailPage: React.FC = () => {
                   </div>
                 </div>
               </div>
-
-              {/* Recent Performance */}
-              <div className="bg-white rounded-lg shadow-sm border p-6">
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">Recent Performance Highlights</h3>
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="p-4 bg-green-50 rounded-lg">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <div className="text-2xl font-bold text-green-600">+12.5%</div>
-                        <div className="text-sm text-gray-600">Follower Growth</div>
-                      </div>
-                      <i className="fas fa-arrow-up text-green-600 text-xl"></i>
-                    </div>
-                  </div>
-                  <div className="p-4 bg-blue-50 rounded-lg">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <div className="text-2xl font-bold text-blue-600">
-                          {recentVideos.length > 0 ? calculateEngagementRate().toFixed(1) : '5.2'}%
-                        </div>
-                        <div className="text-sm text-gray-600">Engagement Rate</div>
-                      </div>
-                      <i className="fas fa-heart text-blue-600 text-xl"></i>
-                    </div>
-                  </div>
-                </div>
-              </div>
             </div>
 
             {/* Right Column */}
             <div className="space-y-6">
-              {/* Engagement Chart */}
-              <div className="bg-white rounded-lg shadow-sm border p-6">
-                <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-lg font-semibold text-gray-900">Engagement Trends</h3>
-                  <select
-                    value={timeRange}
-                    onChange={(e) => setTimeRange(e.target.value)}
-                    className="text-sm border border-gray-300 rounded px-3 py-1 cursor-pointer"
-                  >
-                    <option value="30">30 Days</option>
-                    <option value="60">60 Days</option>
-                    <option value="90">90 Days</option>
-                  </select>
-                </div>
-                <div className="h-48 bg-gray-50 rounded-lg flex items-center justify-center">
-                  <div className="text-center text-gray-500">
-                    <i className="fas fa-chart-line text-3xl mb-2"></i>
-                    <div className="text-sm">Engagement chart visualization</div>
-                  </div>
-                </div>
-              </div>
-
               {/* Platform Performance */}
               <div className="bg-white rounded-lg shadow-sm border p-6">
                 <h3 className="text-lg font-semibold text-gray-900 mb-4">Platform Performance</h3>
@@ -1187,7 +1297,7 @@ const InfluencerDetailPage: React.FC = () => {
                   <div key={`instagram-${post.shortCode}`} className="bg-white rounded-lg shadow-sm border overflow-hidden hover:shadow-md transition-shadow cursor-pointer">
                     <div className="relative">
                       <img
-                        src={post.displayUrl}
+                        src={`https://readdy.ai/api/search-image?query=instagram%20${post.type.toLowerCase()}%20social%20media%20content%20tech%20influencer&width=400&height=300&seq=${post.shortCode}&orientation=landscape`}
                         alt="Instagram post"
                         className="w-full h-48 object-cover object-center"
                       />
@@ -1726,49 +1836,6 @@ const InfluencerDetailPage: React.FC = () => {
                             </div>
                           </div>
                         </div>
-                      </div>
-                    </div>
-
-                    {/* Top Performing Content */}
-                    <div className="bg-white rounded-lg shadow-sm border p-6">
-                      <h3 className="text-lg font-semibold text-gray-900 mb-4">Performance Highlights</h3>
-                      <div className="space-y-4">
-                        <div className="text-sm text-gray-600 mb-3">Top metrics from recent {instagramPosts.length} posts</div>
-
-                        <div className="grid grid-cols-3 gap-3 text-center">
-                          <div className="p-3 bg-green-50 rounded-lg">
-                            <div className="text-lg font-semibold text-green-600">
-                              {instagramPosts.length > 0 ? formatNumber(Math.max(...instagramPosts.map(p => p.likesCount))) : '0'}
-                            </div>
-                            <div className="text-xs text-gray-600">Most Likes</div>
-                          </div>
-                          <div className="p-3 bg-blue-50 rounded-lg">
-                            <div className="text-lg font-semibold text-blue-600">
-                              {instagramPosts.length > 0 ? formatNumber(Math.max(...instagramPosts.map(p => p.commentsCount))) : '0'}
-                            </div>
-                            <div className="text-xs text-gray-600">Most Comments</div>
-                          </div>
-                          <div className="p-3 bg-purple-50 rounded-lg">
-                            <div className="text-lg font-semibold text-purple-600">
-                              {instagramPosts.length > 0 ? formatNumber(Math.max(...instagramPosts.filter(p => p.videoViewCount).map(p => p.videoViewCount || 0))) : '0'}
-                            </div>
-                            <div className="text-xs text-gray-600">Most Views</div>
-                          </div>
-                        </div>
-
-                        {getMostPopularInstagramPost() && (
-                          <div className="mt-4 p-3 bg-gradient-to-r from-pink-50 to-purple-50 rounded-lg border">
-                            <div className="text-sm font-medium text-gray-900 mb-1">🏆 Best Performing Recent Post</div>
-                            <div className="text-sm text-gray-700 font-medium line-clamp-2">
-                              {getMostPopularInstagramPost()?.caption.substring(0, 100)}...
-                            </div>
-                            <div className="text-xs text-gray-500 mt-1">
-                              {formatNumber(getMostPopularInstagramPost()?.likesCount || 0)} likes •
-                              {formatNumber(getMostPopularInstagramPost()?.commentsCount || 0)} comments •
-                              {new Date(getMostPopularInstagramPost()?.timestamp || '').toLocaleDateString()}
-                            </div>
-                          </div>
-                        )}
                       </div>
                     </div>
 
