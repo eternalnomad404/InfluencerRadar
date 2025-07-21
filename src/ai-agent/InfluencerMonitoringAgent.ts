@@ -65,13 +65,13 @@ export class InfluencerMonitoringAgent {
     try {
       // Convert influencer data to documents for LlamaIndex
       const documents = this.createDocumentsFromData(influencerData);
-      
+
       // Create vector index from documents
       this.vectorIndex = await VectorStoreIndex.fromDocuments(documents);
-      
+
       // Create chat engine for querying
       this.chatEngine = this.vectorIndex.asChatEngine();
-      
+
       console.log('✅ AI Agent initialized with', documents.length, 'content documents');
     } catch (error) {
       console.error('❌ Error initializing AI agent:', error);
@@ -88,7 +88,7 @@ export class InfluencerMonitoringAgent {
     influencerData.forEach(influencer => {
       influencer.content.forEach((post, index) => {
         const documentText = this.formatContentForAnalysis(influencer, post);
-        
+
         const document = new Document({
           text: documentText,
           metadata: {
@@ -101,7 +101,7 @@ export class InfluencerMonitoringAgent {
             mentions: post.mentions || []
           }
         });
-        
+
         documents.push(document);
       });
     });
@@ -124,7 +124,7 @@ export class InfluencerMonitoringAgent {
     if (post.caption) parts.push(`Caption: ${post.caption}`);
     if (post.hashtags?.length) parts.push(`Hashtags: ${post.hashtags.join(', ')}`);
     if (post.mentions?.length) parts.push(`Mentions: ${post.mentions.join(', ')}`);
-    
+
     parts.push(`Engagement: ${post.engagement.likes} likes, ${post.engagement.comments} comments${post.engagement.views ? `, ${post.engagement.views} views` : ''}`);
 
     return parts.join('\n');
@@ -280,7 +280,7 @@ export class InfluencerMonitoringAgent {
       .filter(line => line.trim().length > 0)
       .map(line => line.replace(/^\d+\.\s*/, '').trim())
       .filter(line => line.length > 10);
-    
+
     return findings.slice(0, 5);
   }
 
@@ -298,28 +298,28 @@ export class InfluencerMonitoringAgent {
   private parseContentTypes(response: string): { [key: string]: number } {
     const contentTypes: { [key: string]: number } = {};
     const lines = response.split('\n');
-    
+
     lines.forEach(line => {
       const match = line.match(/(\w+).*?(\d+)/);
       if (match) {
         contentTypes[match[1]] = parseInt(match[2]);
       }
     });
-    
+
     return contentTypes;
   }
 
   private parseSentimentAnalysis(response: string): { positive: number; neutral: number; negative: number } {
     const sentiment = { positive: 0, neutral: 0, negative: 0 };
-    
+
     const positiveMatch = response.match(/positive.*?(\d+\.?\d*)%/i);
     const neutralMatch = response.match(/neutral.*?(\d+\.?\d*)%/i);
     const negativeMatch = response.match(/negative.*?(\d+\.?\d*)%/i);
-    
+
     if (positiveMatch) sentiment.positive = parseFloat(positiveMatch[1]);
     if (neutralMatch) sentiment.neutral = parseFloat(neutralMatch[1]);
     if (negativeMatch) sentiment.negative = parseFloat(negativeMatch[1]);
-    
+
     return sentiment;
   }
 

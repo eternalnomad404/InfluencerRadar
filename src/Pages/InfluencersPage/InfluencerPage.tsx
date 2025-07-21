@@ -196,7 +196,7 @@ const InfluencerPage: React.FC = () => {
           name: 'Alex Chen',
           handle: '@alextech',
           profileImage: 'https://readdy.ai/api/search-image?query=professional%20tech%20influencer%20portrait%20young%20asian%20man%20with%20modern%20glasses%20clean%20white%20background%20studio%20lighting%20high%20quality%20headshot&width=100&height=100&seq=alex001&orientation=squarish',
-          platforms: ['youtube', 'twitter'],
+          platforms: ['youtube'],
           followers: '2.5M',
           category: 'Technology',
           engagement: '4.2%',
@@ -231,10 +231,27 @@ const InfluencerPage: React.FC = () => {
     return true;
   });
 
+  // Sort the filtered influencers
+  const sortedInfluencers = [...filteredInfluencers].sort((a, b) => {
+    switch (sortBy) {
+      case 'most-followers':
+        const aFollowers = parseFloat(a.followers.replace('M', '').replace('K', '')) * 
+          (a.followers.includes('M') ? 1000000 : a.followers.includes('K') ? 1000 : 1);
+        const bFollowers = parseFloat(b.followers.replace('M', '').replace('K', '')) * 
+          (b.followers.includes('M') ? 1000000 : b.followers.includes('K') ? 1000 : 1);
+        return bFollowers - aFollowers;
+      
+      case 'alphabetical':
+        return a.name.localeCompare(b.name);
+      
+      default:
+        return 0;
+    }
+  });
+
   const platforms = [
     { id: 'youtube', name: 'YouTube', icon: 'fab fa-youtube' },
-    { id: 'instagram', name: 'Instagram', icon: 'fab fa-instagram' },
-    { id: 'twitter', name: 'Twitter', icon: 'fab fa-twitter' }
+    { id: 'instagram', name: 'Instagram', icon: 'fab fa-instagram' }
   ];
 
   const followerRanges = [
@@ -256,8 +273,6 @@ const InfluencerPage: React.FC = () => {
 
   const sortOptions = [
     { value: 'most-followers', label: 'Most Followers' },
-    { value: 'highest-engagement', label: 'Highest Engagement' },
-    { value: 'recently-added', label: 'Recently Added' },
     { value: 'alphabetical', label: 'Alphabetical A-Z' }
   ];
 
@@ -415,7 +430,7 @@ const InfluencerPage: React.FC = () => {
                 <h3 className="text-lg font-medium text-gray-900 mb-2">Loading YouTube Influencers...</h3>
                 <p className="text-gray-500">Fetching the latest data from YouTube</p>
               </div>
-            ) : filteredInfluencers.length === 0 ? (
+            ) : sortedInfluencers.length === 0 ? (
               /* Empty State */
               <div className="bg-white rounded-lg shadow-sm border p-12 text-center">
                 <div className="mb-4">
@@ -435,7 +450,7 @@ const InfluencerPage: React.FC = () => {
                 {/* Results Count */}
                 <div className="mb-6 flex justify-between items-center">
                   <p className="text-sm text-gray-600">
-                    Showing {filteredInfluencers.length} of {influencers.length} YouTube tech influencers
+                    Showing {sortedInfluencers.length} of {influencers.length} YouTube tech influencers
                   </p>
                   {(() => {
                     const cachedTime = localStorage.getItem('youtube_tech_influencers_timestamp');
@@ -453,65 +468,70 @@ const InfluencerPage: React.FC = () => {
 
                 {/* Influencer Grid */}
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 gap-6 mb-8">
-                  {filteredInfluencers.map(influencer => (
-                    <div key={influencer.id} className="bg-white rounded-lg shadow-sm border p-6 hover:shadow-md transition-shadow cursor-pointer">
-                      <div className="text-center mb-4">
-                        <img
-                          src={influencer.profileImage}
-                          alt={influencer.name}
-                          className="w-16 h-16 rounded-full mx-auto mb-3 object-cover"
-                        />
-                        <h3 className="font-semibold text-gray-900 text-lg">{influencer.name}</h3>
-                        {influencer.handle && (
-                          <p className="text-gray-500 text-sm">{influencer.handle}</p>
-                        )}
-                      </div>
+                  {sortedInfluencers.map(influencer => (
+                    <Link 
+                      key={influencer.id} 
+                      to={`/influencer-detail/${influencer.id}/technology`} 
+                      className="block"
+                    >
+                      <div className="bg-white rounded-lg shadow-sm border p-6 hover:shadow-lg transition-all duration-300 cursor-pointer transform hover:scale-105">
+                        <div className="text-center mb-4">
+                          <img
+                            src={influencer.profileImage}
+                            alt={influencer.name}
+                            className="w-16 h-16 rounded-full mx-auto mb-3 object-cover"
+                          />
+                          <h3 className="font-semibold text-gray-900 text-lg">{influencer.name}</h3>
+                          {influencer.handle && (
+                            <p className="text-gray-500 text-sm">{influencer.handle}</p>
+                          )}
+                        </div>
 
-                      <div className="flex justify-center space-x-3 mb-4">
-                        {influencer.platforms.map(platform => {
-                          const platformInfo = platforms.find(p => p.id === platform);
-                          return (
-                            <i key={platform} className={`${platformInfo?.icon} text-gray-600 text-lg`}></i>
-                          );
-                        })}
-                      </div>
+                        <div className="flex justify-center space-x-3 mb-4">
+                          {influencer.platforms.map(platform => {
+                            const platformInfo = platforms.find(p => p.id === platform);
+                            return (
+                              <i key={platform} className={`${platformInfo?.icon} text-gray-600 text-lg`}></i>
+                            );
+                          })}
+                        </div>
 
-                      <div className="text-center mb-4">
-                        <div className="text-2xl font-bold text-gray-900 mb-1">{influencer.followers}</div>
-                        <div className="text-sm text-gray-500">Followers</div>
-                      </div>
+                        <div className="text-center mb-4">
+                          <div className="text-2xl font-bold text-gray-900 mb-1">{influencer.followers}</div>
+                          <div className="text-sm text-gray-500">Followers</div>
+                        </div>
 
-                      <div className="flex justify-center mb-4">
-                        <span className="bg-blue-50 text-blue-700 px-3 py-1 rounded-full text-xs font-medium">
-                          {influencer.category}
-                        </span>
-                      </div>
+                        <div className="flex justify-center mb-4">
+                          <span className="bg-blue-50 text-blue-700 px-3 py-1 rounded-full text-xs font-medium">
+                            {influencer.category}
+                          </span>
+                        </div>
 
-                      <div className="text-center mb-4">
-                        <div className="text-xs text-gray-500">
-                          📍 {influencer.country || 'Not known'}
+                        <div className="text-center mb-4">
+                          <div className="text-xs text-gray-500">
+                            📍 {influencer.country || 'Not known'}
+                          </div>
+                        </div>
+
+                        <div className="text-center mb-4">
+                          {influencer.engagement ? (
+                            <div className="text-sm text-gray-600">
+                              <span className="font-medium text-green-600">{influencer.engagement}</span> engagement
+                            </div>
+                          ) : (
+                            <div className="text-sm text-gray-400">
+                              Engagement data not available
+                            </div>
+                          )}
+                        </div>
+
+                        <div className="text-center">
+                          <div className="w-full bg-blue-600 text-white py-2 !rounded-button text-sm font-medium hover:bg-blue-700 transition-colors">
+                            View Dashboard
+                          </div>
                         </div>
                       </div>
-
-                      <div className="text-center mb-4">
-                        {influencer.engagement ? (
-                          <div className="text-sm text-gray-600">
-                            <span className="font-medium text-green-600">{influencer.engagement}</span> engagement
-                          </div>
-                        ) : (
-                          <div className="text-sm text-gray-400">
-                            Engagement data not available
-                          </div>
-                        )}
-                      </div>
-
-                  <Link to={`/influencer-detail/${influencer.id}/technology`} className="w-full">
-  <button className="w-full bg-blue-600 text-white py-2 !rounded-button text-sm font-medium hover:bg-blue-700 cursor-pointer whitespace-nowrap">
-    View Dashboard
-  </button>
-</Link>
-
-                    </div>
+                    </Link>
                   ))}
                 </div>
 

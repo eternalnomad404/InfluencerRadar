@@ -890,144 +890,184 @@ const InfluencerDetailPage: React.FC = () => {
       ) : (
         <>
           {/* Influencer Profile Section */}
-          <div className="bg-white border-b">
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-              <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between">
-                <div className="flex items-start space-x-6">
-                  <img
-                    src={influencerData.profileImage}
-                    alt={influencerData.name}
-                    className="w-24 h-24 rounded-full object-cover"
-                  />
-                  <div>
-                    <h2 className="text-3xl font-bold text-gray-900">{influencerData.name}</h2>
-                    <p className="text-lg text-gray-600 mt-1">{influencerData.handle}</p>
-                    <p className="text-sm text-gray-500 mt-2">{influencerData.niche}</p>
-                    <p className="text-sm text-gray-500 mt-1">
-                      📍 {influencerData.country || 'Not known'}
-                    </p>
+          <div className="bg-gradient-to-br from-white to-gray-50 border-b border-gray-200">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+              <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between lg:space-x-8">
+                {/* Left Side - Centered Influencer Details */}
+                <div className="flex-1 flex items-center justify-center lg:justify-start">
+                  <div className="flex items-center space-x-6 max-w-2xl">
+                    <div className="relative">
+                      <img
+                        src={influencerData.profileImage}
+                        alt={influencerData.name}
+                        className="w-28 h-28 rounded-2xl object-cover shadow-lg border-4 border-white"
+                      />
+                      <div className="absolute -bottom-2 -right-2 w-7 h-7 bg-green-500 rounded-full border-3 border-white flex items-center justify-center">
+                        <i className="fas fa-check text-white text-xs"></i>
+                      </div>
+                    </div>
+                    <div className="flex-1">
+                      <h1 className="text-3xl font-bold text-gray-900 mb-1">{influencerData.name}</h1>
+                      <p className="text-lg text-gray-600 mb-3 font-medium">{influencerData.handle}</p>
 
-                    {/* Platform Badges */}
-                    <div className="flex items-center space-x-4 mt-4">
-                      {influencerData.platforms.instagram && (
-                        <div className="flex items-center space-x-2 px-3 py-1 bg-pink-50 rounded-full cursor-pointer">
-                          <i className="fab fa-instagram text-pink-600"></i>
-                          <span className="text-sm font-medium text-pink-700">{influencerData.platforms.instagram.followers}</span>
+                      <div className="flex items-center space-x-4 mb-3">
+                        <div className="flex items-center space-x-2">
+                          <div className="w-7 h-7 bg-blue-100 rounded-lg flex items-center justify-center">
+                            <i className="fas fa-tag text-blue-600 text-xs"></i>
+                          </div>
+                          <span className="text-sm text-gray-700 font-medium">{influencerData.niche}</span>
                         </div>
-                      )}
-                      {influencerData.platforms.youtube && (
-                        <div className="flex items-center space-x-2 px-3 py-1 bg-red-50 rounded-full cursor-pointer">
-                          <i className="fab fa-youtube text-red-600"></i>
-                          <span className="text-sm font-medium text-red-700">{influencerData.platforms.youtube.followers}</span>
+
+                        <div className="flex items-center space-x-2">
+                          <div className="w-7 h-7 bg-green-100 rounded-lg flex items-center justify-center">
+                            <i className="fas fa-map-marker-alt text-green-600 text-xs"></i>
+                          </div>
+                          <span className="text-sm text-gray-700 font-medium">{influencerData.country || 'Global'}</span>
                         </div>
-                      )}
+                      </div>
+
+                      {/* Enhanced Platform Badges */}
+                      <div className="flex items-center space-x-3 mt-4">
+                        {influencerData.platforms.instagram && (
+                          <div className="flex items-center space-x-2 px-4 py-2 bg-gradient-to-r from-pink-500 to-purple-600 rounded-lg cursor-pointer hover:shadow-md transition-all duration-300 transform hover:scale-105">
+                            <i className="fab fa-instagram text-white"></i>
+                            <div className="text-white">
+                              <div className="text-sm font-bold">{influencerData.platforms.instagram.followers}</div>
+                              <div className="text-xs opacity-90">Instagram</div>
+                            </div>
+                          </div>
+                        )}
+                        {influencerData.platforms.youtube && (
+                          <div className="flex items-center space-x-2 px-4 py-2 bg-gradient-to-r from-red-500 to-red-600 rounded-lg cursor-pointer hover:shadow-md transition-all duration-300 transform hover:scale-105">
+                            <i className="fab fa-youtube text-white"></i>
+                            <div className="text-white">
+                              <div className="text-sm font-bold">{influencerData.platforms.youtube.followers}</div>
+                              <div className="text-xs opacity-90">YouTube</div>
+                            </div>
+                          </div>
+                        )}
+                      </div>
                     </div>
                   </div>
                 </div>
 
-                {/* Key Metrics - Cross Platform Performance */}
-                <div className="mt-6 lg:mt-0 bg-gray-50 rounded-xl p-6 min-w-[400px]">
-                  {/* Total Combined Metrics */}
-                  <div className="text-center mb-6 pb-4 border-b border-gray-200">
-                    <div className="text-3xl font-bold text-gray-900 mb-1">
-                      {instagramData ? calculateTotalFollowers() : influencerData.totalFollowers}
+                {/* Right Side - Expanded Metrics */}
+                <div className="mt-6 lg:mt-0 bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl p-8 min-w-[450px] shadow-md border border-gray-200">
+                  {/* Top Row - Total Followers and Cross-Platform Score */}
+                  <div className="grid grid-cols-2 gap-6 mb-8">
+                    {/* Total Combined Metrics */}
+                    <div className="text-center p-6 bg-white rounded-lg shadow-sm border border-gray-200">
+                      <div className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mb-2">
+                        {instagramData ? calculateTotalFollowers() : influencerData.totalFollowers}
+                      </div>
+                      <div className="text-lg text-gray-700 font-semibold">Total Followers</div>
+                      <div className="text-sm text-gray-500 mt-1">Across all platforms</div>
                     </div>
-                    <div className="text-sm text-gray-600 font-medium">Total Followers</div>
+
+                    {/* Cross-Platform Performance Indicator */}
+                    {instagramData && (
+                      <div className="bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg p-6 text-white shadow-md">
+                        <div className="text-center">
+                          <div className="flex items-center justify-center space-x-2 mb-2">
+                            <div className="w-6 h-6 bg-white bg-opacity-20 rounded-full flex items-center justify-center">
+                              <i className="fas fa-chart-line text-white text-xs"></i>
+                            </div>
+                            <span className="text-lg font-bold">Cross-Platform Score</span>
+                          </div>
+                          <div className="text-3xl font-bold mb-2">
+                            {Math.round((calculateEngagementRate() + calculateInstagramEngagementRate()) / 2 * 10) / 10}%
+                          </div>
+                          <div className="text-sm opacity-90">Combined Engagement</div>
+                          <div className="text-xs opacity-75 mt-1">YouTube + Instagram</div>
+                        </div>
+                      </div>
+                    )}
                   </div>
 
-                  {/* Platform Metrics Container - Side by Side */}
-                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-5">
+                  {/* Bottom Row - Platform Metrics Side by Side */}
+                  <div className="grid grid-cols-2 gap-6">
                     {/* YouTube Metrics */}
-                    <div className="bg-white rounded-lg p-4 shadow-sm border border-gray-100">
-                      <div className="flex items-center space-x-2 mb-3">
-                        <div className="w-8 h-8 bg-red-50 rounded-lg flex items-center justify-center">
-                          <i className="fab fa-youtube text-red-600 text-sm"></i>
+                    <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-200">
+                      <div className="flex items-center justify-between mb-4">
+                        <div className="flex items-center space-x-2">
+                          <div className="w-10 h-10 bg-gradient-to-br from-red-500 to-red-600 rounded-lg flex items-center justify-center">
+                            <i className="fab fa-youtube text-white text-lg"></i>
+                          </div>
+                          <div>
+                            <span className="text-lg font-bold text-gray-800">YouTube</span>
+                            <div className="text-sm text-gray-500">Content Platform</div>
+                          </div>
                         </div>
-                        <span className="text-sm font-semibold text-gray-700">YouTube</span>
+                      </div>
+                      <div className="text-center mb-4">
+                        <div className="text-2xl font-bold text-red-600">
+                          {influencerData.platforms?.youtube?.followers || 'N/A'}
+                        </div>
+                        <div className="text-sm text-gray-600">Subscribers</div>
                       </div>
                       <div className="space-y-3">
-                        <div className="text-center">
-                          <div className="text-lg font-bold text-red-600 mb-1">
-                            {influencerData.platforms?.youtube?.followers || 'N/A'}
+                        <div className="text-center p-3 bg-red-50 rounded-lg">
+                          <div className="text-lg font-bold text-red-600">
+                            {recentVideos.length > 0 ? calculateEngagementRate().toFixed(1) : influencerData.engagementRate || '5.1'}%
                           </div>
-                          <div className="text-xs text-gray-500">Followers</div>
+                          <div className="text-sm text-gray-600">Engagement Rate</div>
                         </div>
-                        <div className="grid grid-cols-2 gap-2">
-                          <div className="text-center">
-                            <div className="text-sm font-bold text-red-600 mb-1">
-                              {recentVideos.length > 0 ? calculateEngagementRate().toFixed(1) : influencerData.engagementRate || '5.1'}%
-                            </div>
-                            <div className="text-xs text-gray-500">Engagement</div>
+                        <div className="text-center p-3 bg-gray-50 rounded-lg">
+                          <div className="text-lg font-bold text-red-600">
+                            {recentVideos.length > 0 ? formatNumber(calculateAverageViews()) : 'N/A'}
                           </div>
-                          <div className="text-center">
-                            <div className="text-sm font-bold text-red-600 mb-1">
-                              {recentVideos.length > 0 ? formatNumber(calculateAverageViews()) : 'N/A'}
-                            </div>
-                            <div className="text-xs text-gray-500">Avg Views</div>
-                          </div>
+                          <div className="text-sm text-gray-600">Avg Views</div>
                         </div>
                       </div>
                     </div>
 
                     {/* Instagram Metrics */}
                     {instagramData ? (
-                      <div className="bg-white rounded-lg p-4 shadow-sm border border-gray-100">
-                        <div className="flex items-center space-x-2 mb-3">
-                          <div className="w-8 h-8 bg-pink-50 rounded-lg flex items-center justify-center">
-                            <i className="fab fa-instagram text-pink-600 text-sm"></i>
+                      <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-200">
+                        <div className="flex items-center justify-between mb-4">
+                          <div className="flex items-center space-x-2">
+                            <div className="w-10 h-10 bg-gradient-to-br from-pink-500 to-purple-600 rounded-lg flex items-center justify-center">
+                              <i className="fab fa-instagram text-white text-lg"></i>
+                            </div>
+                            <div>
+                              <span className="text-lg font-bold text-gray-800">Instagram</span>
+                              <div className="text-sm text-gray-500">Social Platform</div>
+                            </div>
                           </div>
-                          <span className="text-sm font-semibold text-gray-700">Instagram</span>
+                        </div>
+                        <div className="text-center mb-4">
+                          <div className="text-2xl font-bold text-pink-600">
+                            {formatNumber(instagramData.followersCount)}
+                          </div>
+                          <div className="text-sm text-gray-600">Followers</div>
                         </div>
                         <div className="space-y-3">
-                          <div className="text-center">
-                            <div className="text-lg font-bold text-pink-600 mb-1">
-                              {formatNumber(instagramData.followersCount)}
+                          <div className="text-center p-3 bg-pink-50 rounded-lg">
+                            <div className="text-lg font-bold text-pink-600">
+                              {calculateInstagramEngagementRate().toFixed(1)}%
                             </div>
-                            <div className="text-xs text-gray-500">Followers</div>
+                            <div className="text-sm text-gray-600">Engagement Rate</div>
                           </div>
-                          <div className="grid grid-cols-2 gap-2">
-                            <div className="text-center">
-                              <div className="text-sm font-bold text-pink-600 mb-1">
-                                {calculateInstagramEngagementRate().toFixed(1)}%
-                              </div>
-                              <div className="text-xs text-gray-500">Engagement</div>
+                          <div className="text-center p-3 bg-gray-50 rounded-lg">
+                            <div className="text-lg font-bold text-pink-600">
+                              {formatNumber(getAverageInstagramLikes())}
                             </div>
-                            <div className="text-center">
-                              <div className="text-sm font-bold text-pink-600 mb-1">
-                                {formatNumber(getAverageInstagramLikes())}
-                              </div>
-                              <div className="text-xs text-gray-500">Avg Likes</div>
-                            </div>
+                            <div className="text-sm text-gray-600">Avg Likes</div>
                           </div>
                         </div>
                       </div>
                     ) : (
-                      <div className="bg-gray-100 rounded-lg p-4 border border-gray-200 flex items-center justify-center">
+                      <div className="bg-white rounded-lg p-6 border border-gray-200 flex items-center justify-center">
                         <div className="text-center">
-                          <i className="fab fa-instagram text-gray-400 text-2xl mb-2"></i>
-                          <div className="text-sm text-gray-500">Instagram data loading...</div>
+                          <div className="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                            <i className="fab fa-instagram text-gray-400 text-xl"></i>
+                          </div>
+                          <div className="text-sm text-gray-500 font-medium">Instagram Loading...</div>
+                          <div className="text-xs text-gray-400">Fetching data...</div>
                         </div>
                       </div>
                     )}
                   </div>
-
-                  {/* Cross-Platform Performance Indicator */}
-                  {instagramData && (
-                    <div className="bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg p-4 border border-blue-100">
-                      <div className="text-center">
-                        <div className="flex items-center justify-center space-x-2 mb-2">
-                          <div className="w-6 h-6 bg-blue-100 rounded-full flex items-center justify-center">
-                            <i className="fas fa-chart-line text-blue-600 text-xs"></i>
-                          </div>
-                          <span className="text-sm font-semibold text-gray-700">Cross-Platform Score</span>
-                        </div>
-                        <div className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mb-1">
-                          {Math.round((calculateEngagementRate() + calculateInstagramEngagementRate()) / 2 * 10) / 10}%
-                        </div>
-                        <div className="text-xs text-gray-600 font-medium">Combined Engagement</div>
-                      </div>
-                    </div>
-                  )}
                 </div>
               </div>
             </div>
