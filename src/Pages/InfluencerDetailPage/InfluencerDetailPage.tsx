@@ -14,7 +14,6 @@ interface InfluencerData {
   platforms: {
     instagram?: { followers: string; handle: string };
     youtube?: { followers: string; handle: string };
-    linkedin?: { followers: string; handle: string };
   };
   engagementRate: number;
   totalFollowers: string;
@@ -324,19 +323,19 @@ const InfluencerDetailPage: React.FC = () => {
   const loadInstagramData = async () => {
     try {
       setInstagramLoading(true);
-      
+
       // Import the Instagram data
       const instagramData = await import('../../instaJSON/15Influencers.json');
       const influencers = instagramData.default;
-      
+
       // Create a comprehensive mapping between YouTube channel names/IDs and Instagram usernames
       const usernameMapping: { [key: string]: string } = {
         // Direct channel ID mappings (for featured influencers)
         'UCsTcErHg8oDvUnTzoqsYeNw': 'unboxtherapy', // Unbox Therapy
-        'UCBJycsmduvYEL83R_U4JriQ': 'mkbhd', // Marques Brownlee 
+        'UCBJycsmduvYEL83R_U4JriQ': 'mkbhd', // Marques Brownlee
         'UCXuqSBlHAE6Xw-yeJA0Tunw': 'linustech', // Linus Tech Tips
         'UC6QYFutt9cluQ3uSM8XzKcQ': 'mrwhosetheboss', // MrWhosetheBoss
-        
+
         // Additional channel name mappings for comprehensive coverage
         'unbox therapy': 'unboxtherapy',
         'marques brownlee': 'mkbhd',
@@ -354,7 +353,7 @@ const InfluencerDetailPage: React.FC = () => {
         'tech boss': 'techbossindia',
         'gogi tech': 'gogitechreal',
         'manoj saru': 'manojsaru',
-        
+
         // Case variations and common searches
         'technical_guruji': 'technicalguruji',
         'tech_burner': 'techburner',
@@ -367,7 +366,7 @@ const InfluencerDetailPage: React.FC = () => {
 
       // Try to find matching Instagram profile
       let instagramUsername = '';
-      
+
       // First try direct channel ID mapping
       if (channelId && usernameMapping[channelId]) {
         instagramUsername = usernameMapping[channelId];
@@ -377,11 +376,11 @@ const InfluencerDetailPage: React.FC = () => {
         const normalizedName = influencerData.name.toLowerCase().replace(/\s+/g, ' ').trim();
         instagramUsername = usernameMapping[normalizedName] || '';
       }
-      
+
       // If still no match, try partial matching with channel name
       if (!instagramUsername && influencerData?.name) {
         const searchName = influencerData.name.toLowerCase();
-        
+
         // Look for partial matches in our mapping
         for (const [key, value] of Object.entries(usernameMapping)) {
           if (searchName.includes(key.toLowerCase()) || key.toLowerCase().includes(searchName)) {
@@ -389,25 +388,25 @@ const InfluencerDetailPage: React.FC = () => {
             break;
           }
         }
-        
+
         // If still no match, try searching through Instagram data directly
         if (!instagramUsername) {
           const directMatch = influencers.find((influencer: any) => {
             const instagramName = influencer.fullName.toLowerCase();
             const instagramUsername = influencer.username.toLowerCase();
-            return instagramName.includes(searchName) || 
+            return instagramName.includes(searchName) ||
                    searchName.includes(instagramName) ||
                    instagramUsername.includes(searchName.replace(/\s+/g, '')) ||
                    searchName.replace(/\s+/g, '').includes(instagramUsername);
           });
-          
+
           if (directMatch) {
             instagramUsername = directMatch.username;
             console.log(`🔍 Found direct match for "${influencerData.name}" → @${instagramUsername}`);
           }
         }
       }
-      
+
       // Final fallback: if we still have no match, try to use any available Instagram data for demo purposes
       if (!instagramUsername && influencers.length > 0) {
         // Use a random Instagram influencer for demo purposes, preferring verified accounts
@@ -418,23 +417,23 @@ const InfluencerDetailPage: React.FC = () => {
       }
 
       console.log(`Searching for Instagram data with username: ${instagramUsername}`);
-      
+
       if (instagramUsername) {
-        const matchingInfluencer = influencers.find((influencer: any) => 
+        const matchingInfluencer = influencers.find((influencer: any) =>
           influencer.username === instagramUsername
         );
 
         if (matchingInfluencer) {
           setInstagramData(matchingInfluencer);
-          
+
           // Combine IGTV videos and regular posts
           const allPosts = [
             ...(matchingInfluencer.latestIgtvVideos || []),
             ...(matchingInfluencer.latestPosts || [])
           ].sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
-          
+
           setInstagramPosts(allPosts.slice(0, 12)); // Limit to 12 most recent posts
-          
+
           console.log(`✅ Loaded Instagram data for ${matchingInfluencer.fullName} (@${matchingInfluencer.username})`);
           console.log(`📊 Found ${allPosts.length} total posts, showing ${Math.min(allPosts.length, 12)} recent posts`);
           console.log(`👥 ${matchingInfluencer.followersCount.toLocaleString()} followers`);
@@ -625,18 +624,6 @@ const InfluencerDetailPage: React.FC = () => {
     },
     {
       id: 5,
-      platform: 'linkedin',
-      thumbnail: 'https://readdy.ai/api/search-image?query=tech%20industry%20trends%20professional&width=300&height=200',
-      title: 'The Future of Mobile Technology',
-      caption: 'Industry insights on where mobile technology is heading and what it means for consumers.',
-      type: 'Article',
-      date: '2 weeks ago',
-      views: 125000,
-      likes: 8200,
-      comments: 340
-    },
-    {
-      id: 6,
       platform: 'youtube',
       thumbnail: 'https://readdy.ai/api/search-image?query=smartphone%20unboxing%20first%20impressions&width=300&height=200',
       title: 'Galaxy S24 Ultra First Impressions',
@@ -660,7 +647,6 @@ const InfluencerDetailPage: React.FC = () => {
     switch (platform) {
       case 'instagram': return 'fab fa-instagram';
       case 'youtube': return 'fab fa-youtube';
-      case 'linkedin': return 'fab fa-linkedin';
       default: return 'fas fa-share-alt';
     }
   };
@@ -680,11 +666,11 @@ const InfluencerDetailPage: React.FC = () => {
   const getCommentSentiment = (videoId: string) => {
     const comments = videoComments[videoId];
     if (!comments || comments.length === 0) return 'neutral';
-    
+
     // Placeholder logic - in the future, you can implement AI sentiment analysis here
     const totalLikes = comments.reduce((sum, comment) => sum + comment.likeCount, 0);
     const avgLikes = totalLikes / comments.length;
-    
+
     if (avgLikes > 5) return 'positive';
     if (avgLikes < 2) return 'negative';
     return 'neutral';
@@ -693,20 +679,20 @@ const InfluencerDetailPage: React.FC = () => {
   // Instagram Analytics Helper Functions
   const calculateInstagramEngagementRate = () => {
     if (!instagramData || instagramPosts.length === 0) return 0;
-    
-    const totalEngagement = instagramPosts.reduce((sum, post) => 
+
+    const totalEngagement = instagramPosts.reduce((sum, post) =>
       sum + post.likesCount + post.commentsCount, 0
     );
-    const totalViews = instagramPosts.reduce((sum, post) => 
+    const totalViews = instagramPosts.reduce((sum, post) =>
       sum + (post.videoViewCount || post.likesCount * 10), 0 // Estimate views for photos
     );
-    
+
     return totalViews > 0 ? ((totalEngagement / totalViews) * 100) : 0;
   };
 
   const getInstagramPostTypeDistribution = () => {
     if (instagramPosts.length === 0) return { photos: 0, videos: 0, reels: 0 };
-    
+
     const distribution = instagramPosts.reduce((acc, post) => {
       if (post.type === 'Video' || post.videoUrl) {
         acc.videos++;
@@ -717,7 +703,7 @@ const InfluencerDetailPage: React.FC = () => {
       }
       return acc;
     }, { photos: 0, videos: 0, reels: 0 });
-    
+
     return distribution;
   };
 
@@ -851,12 +837,6 @@ const InfluencerDetailPage: React.FC = () => {
                         <div className="flex items-center space-x-2 px-3 py-1 bg-red-50 rounded-full cursor-pointer">
                           <i className="fab fa-youtube text-red-600"></i>
                           <span className="text-sm font-medium text-red-700">{influencerData.platforms.youtube.followers}</span>
-                        </div>
-                      )}
-                      {influencerData.platforms.linkedin && (
-                        <div className="flex items-center space-x-2 px-3 py-1 bg-blue-50 rounded-full cursor-pointer">
-                          <i className="fab fa-linkedin text-blue-600"></i>
-                          <span className="text-sm font-medium text-blue-700">{influencerData.platforms.linkedin.followers}</span>
                         </div>
                       )}
                     </div>
@@ -1041,16 +1021,6 @@ const InfluencerDetailPage: React.FC = () => {
                       <div className="text-xs text-gray-500">Engagement</div>
                     </div>
                   </div>
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-3">
-                      <i className="fab fa-linkedin text-blue-600"></i>
-                      <span className="text-sm font-medium">LinkedIn</span>
-                    </div>
-                    <div className="text-right">
-                      <div className="text-sm font-semibold">3.1%</div>
-                      <div className="text-xs text-gray-500">Engagement</div>
-                    </div>
-                  </div>
                 </div>
               </div>
             </div>
@@ -1072,13 +1042,12 @@ const InfluencerDetailPage: React.FC = () => {
                     <option value="all">All Platforms</option>
                     <option value="instagram">Instagram</option>
                     <option value="youtube">YouTube</option>
-                    <option value="linkedin">LinkedIn</option>
                   </select>
                 </div>
               </div>
               <div className="text-sm text-gray-500">
                 {(videosLoading || instagramLoading) ? 'Loading content...' :
-                 `Showing ${(selectedPlatform === 'all' || selectedPlatform === 'youtube' ? recentVideos.length : 0) + 
+                 `Showing ${(selectedPlatform === 'all' || selectedPlatform === 'youtube' ? recentVideos.length : 0) +
                            (selectedPlatform === 'all' || selectedPlatform === 'instagram' ? instagramPosts.length : 0)} posts`}
               </div>
             </div>
@@ -1584,9 +1553,9 @@ const InfluencerDetailPage: React.FC = () => {
                       <i className="fab fa-instagram text-pink-600 mr-3"></i>
                       Instagram Analytics
                     </h2>
-                    {instagramData.username !== 'unboxtherapy' && 
-                     instagramData.username !== 'mkbhd' && 
-                     instagramData.username !== 'linustech' && 
+                    {instagramData.username !== 'unboxtherapy' &&
+                     instagramData.username !== 'mkbhd' &&
+                     instagramData.username !== 'linustech' &&
                      instagramData.username !== 'mrwhosetheboss' && (
                       <div className="text-xs text-gray-500 bg-blue-50 px-3 py-1 rounded-full">
                         📊 Showing similar influencer data: @{instagramData.username}
@@ -1631,7 +1600,7 @@ const InfluencerDetailPage: React.FC = () => {
                           <div>
                             <div className="text-sm font-medium text-gray-900">Account Type</div>
                             <div className="text-xs text-gray-600">
-                              {instagramData.verified ? 'Verified' : 'Unverified'} • 
+                              {instagramData.verified ? 'Verified' : 'Unverified'} •
                               {instagramData.isBusinessAccount ? ' Business' : ' Personal'}
                             </div>
                           </div>
@@ -1725,7 +1694,7 @@ const InfluencerDetailPage: React.FC = () => {
                       <h3 className="text-lg font-semibold text-gray-900 mb-4">Performance Highlights</h3>
                       <div className="space-y-4">
                         <div className="text-sm text-gray-600 mb-3">Top metrics from recent {instagramPosts.length} posts</div>
-                        
+
                         <div className="grid grid-cols-3 gap-3 text-center">
                           <div className="p-3 bg-green-50 rounded-lg">
                             <div className="text-lg font-semibold text-green-600">

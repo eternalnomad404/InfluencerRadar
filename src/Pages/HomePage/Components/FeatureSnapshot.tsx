@@ -25,7 +25,7 @@ const FeatureSnapshot = () => {
                   </div>
                   <div>
                     <h3 className="text-lg font-semibold text-gray-900 mb-2">Multi-Platform Coverage</h3>
-                    <p className="text-gray-600">Monitor YouTube, Instagram, LinkedIn, and Twitter from a single dashboard.</p>
+                    <p className="text-gray-600">Monitor YouTube, Instagram, and Twitter from a single dashboard.</p>
                   </div>
                 </div>
 

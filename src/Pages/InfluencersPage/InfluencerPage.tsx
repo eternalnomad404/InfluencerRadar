@@ -196,7 +196,7 @@ const InfluencerPage: React.FC = () => {
           name: 'Alex Chen',
           handle: '@alextech',
           profileImage: 'https://readdy.ai/api/search-image?query=professional%20tech%20influencer%20portrait%20young%20asian%20man%20with%20modern%20glasses%20clean%20white%20background%20studio%20lighting%20high%20quality%20headshot&width=100&height=100&seq=alex001&orientation=squarish',
-          platforms: ['youtube', 'twitter', 'linkedin'],
+          platforms: ['youtube', 'twitter'],
           followers: '2.5M',
           category: 'Technology',
           engagement: '4.2%',
@@ -234,7 +234,6 @@ const InfluencerPage: React.FC = () => {
   const platforms = [
     { id: 'youtube', name: 'YouTube', icon: 'fab fa-youtube' },
     { id: 'instagram', name: 'Instagram', icon: 'fab fa-instagram' },
-    { id: 'linkedin', name: 'LinkedIn', icon: 'fab fa-linkedin' },
     { id: 'twitter', name: 'Twitter', icon: 'fab fa-twitter' }
   ];
 

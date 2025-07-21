@@ -12,7 +12,6 @@ const Footer = () => {
               </p>
               <div className="flex space-x-4">
                 <i className="fab fa-twitter text-xl text-gray-400 hover:text-white cursor-pointer"></i>
-                <i className="fab fa-linkedin text-xl text-gray-400 hover:text-white cursor-pointer"></i>
                 <i className="fab fa-instagram text-xl text-gray-400 hover:text-white cursor-pointer"></i>
               </div>
             </div>

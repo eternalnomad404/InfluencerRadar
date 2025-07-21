@@ -20,7 +20,7 @@ const HeroSection = () => {
               </h1>
               
               <p className="text-xl text-gray-600 mb-8 leading-relaxed">
-                Track your curated influencers across YouTube, Instagram, LinkedIn, and Twitter. Get AI-powered summaries every 48 hours — no noise, just insight.
+                Track your curated influencers across YouTube, Instagram, and Twitter. Get AI-powered summaries every 48 hours — no noise, just insight.
               </p>
               
               <button className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-4 text-lg font-semibold !rounded-button whitespace-nowrap cursor-pointer shadow-lg hover:shadow-xl transition-all duration-300">
