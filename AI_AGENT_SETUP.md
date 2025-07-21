@@ -107,16 +107,16 @@ import { useInfluencerMonitoring } from './hooks/useInfluencerMonitoring';
 
 function MonitoringDashboard() {
   const { trendBrief, alerts, generateTrendBrief } = useInfluencerMonitoring();
-  
+
   useEffect(() => {
     // Auto-generate every 48 hours
     const interval = setInterval(() => {
       generateTrendBrief(influencerData);
     }, 48 * 60 * 60 * 1000);
-    
+
     return () => clearInterval(interval);
   }, []);
-  
+
   return <TrendBriefComponent autoRefresh={true} refreshInterval={48} />;
 }
 ```
@@ -141,12 +141,12 @@ import { useInfluencerMonitoring } from './hooks/useInfluencerMonitoring';
 
 function App() {
   const { trendBrief, alerts, generateTrendBrief, queryAgent } = useInfluencerMonitoring();
-  
+
   // The service automatically uses Gemini if API key is available
   // Falls back to mock data if Gemini is unavailable
-  
+
   return (
-    <TrendBriefComponent 
+    <TrendBriefComponent
       influencerData={yourInfluencerData}
       autoRefresh={true}
       refreshInterval={48}

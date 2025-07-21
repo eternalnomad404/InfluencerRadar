@@ -59,14 +59,14 @@ class GeminiInfluencerMonitoringService implements InfluencerMonitoringService {
       console.log('🤖 Service: Generating trend brief with Gemini AI...');
       console.log('🤖 Service: Input data:', influencerData.length, 'influencers');
       console.log('🤖 Service: Data structure:', influencerData);
-      
+
       // Convert influencerData to the format expected by GeminiInfluencerAgent
       const formattedData = this.formatInfluencerData(influencerData);
       console.log('🤖 Service: Formatted data:', formattedData);
-      
+
       // Initialize agent with data
       await this.agent.initialize(formattedData);
-      
+
       // Generate trend brief using Gemini
       const brief = await this.agent.generateTrendBrief(timeframe);
       console.log('✅ Gemini trend brief generated successfully');
@@ -139,14 +139,14 @@ class GeminiInfluencerMonitoringService implements InfluencerMonitoringService {
         return `🤖 AI Analysis: ${response}`;
       }
     }
-    
+
     return "🤖 AI Analysis: Based on the current data analysis, I can see strong performance across all monitored platforms with particular strength in video content and technology reviews.";
   }
 
   private getMockAlerts(): string[] {
     return [
       "🚨 Viral content detected: Tech review video reached 2.5M views in 24 hours",
-      "📈 Engagement spike: Instagram posts showing 150% above normal engagement", 
+      "📈 Engagement spike: Instagram posts showing 150% above normal engagement",
       "⚠️ Negative sentiment alert: Product review received unusual negative feedback",
       "🔥 Trending topic: #AIRevolution mentioned 300% more than usual"
     ];
@@ -158,7 +158,7 @@ class GeminiInfluencerMonitoringService implements InfluencerMonitoringService {
       setTimeout(() => {
         // Analyze the provided data to generate insights
         const platforms = [...new Set(influencerData.map(inf => inf.platform || 'youtube'))];
-    
+
         resolve({
           summary: `🤖 AI-Powered Analysis: Analyzed ${influencerData.length} influencers across ${platforms.length} platforms over the past ${timeframe}. Key trends show increased focus on tech reviews, AI discussions, and mobile technology. Engagement rates are highest for video content and product unboxings.`,
           period: timeframe,
@@ -259,7 +259,7 @@ export const useInfluencerMonitoring = () => {
     console.log('📊 Hook: Influencer data structure:', influencerData);
     setLoading(true);
     setError(null);
-    
+
     try {
       const brief = await service.generateTrendBrief(influencerData, timeframe);
       console.log('✅ Hook: Trend brief generated successfully');

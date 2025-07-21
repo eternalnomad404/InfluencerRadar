@@ -30,7 +30,7 @@ const HeroSection = () => {
                 Track your curated influencers across YouTube, Instagram, and Twitter. Get AI-powered summaries every 48 hours — no noise, just insight.
               </p>
 
-              <button 
+              <button
                 onClick={handleStartMonitoring}
                 className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-4 text-lg font-semibold !rounded-button whitespace-nowrap cursor-pointer shadow-lg hover:shadow-xl transition-all duration-300"
               >

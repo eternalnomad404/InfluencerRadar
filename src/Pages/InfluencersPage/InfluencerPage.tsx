@@ -235,15 +235,15 @@ const InfluencerPage: React.FC = () => {
   const sortedInfluencers = [...filteredInfluencers].sort((a, b) => {
     switch (sortBy) {
       case 'most-followers':
-        const aFollowers = parseFloat(a.followers.replace('M', '').replace('K', '')) * 
+        const aFollowers = parseFloat(a.followers.replace('M', '').replace('K', '')) *
           (a.followers.includes('M') ? 1000000 : a.followers.includes('K') ? 1000 : 1);
-        const bFollowers = parseFloat(b.followers.replace('M', '').replace('K', '')) * 
+        const bFollowers = parseFloat(b.followers.replace('M', '').replace('K', '')) *
           (b.followers.includes('M') ? 1000000 : b.followers.includes('K') ? 1000 : 1);
         return bFollowers - aFollowers;
-      
+
       case 'alphabetical':
         return a.name.localeCompare(b.name);
-      
+
       default:
         return 0;
     }
@@ -469,9 +469,9 @@ const InfluencerPage: React.FC = () => {
                 {/* Influencer Grid */}
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 gap-6 mb-8">
                   {sortedInfluencers.map(influencer => (
-                    <Link 
-                      key={influencer.id} 
-                      to={`/influencer-detail/${influencer.id}/technology`} 
+                    <Link
+                      key={influencer.id}
+                      to={`/influencer-detail/${influencer.id}/technology`}
                       className="block"
                     >
                       <div className="bg-white rounded-lg shadow-sm border p-6 hover:shadow-lg transition-all duration-300 cursor-pointer transform hover:scale-105">

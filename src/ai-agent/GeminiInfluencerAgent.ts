@@ -134,13 +134,13 @@ export class GeminiInfluencerAgent {
       if (!response.ok) {
         const errorText = await response.text();
         console.error('❌ Gemini API Error Response:', errorText);
-        
+
         if (response.status === 429) {
           console.log('🚫 Rate limit exceeded. Using enhanced demo response with rate limit info...');
           this.isProcessing = false;
           return this.generateRateLimitedResponse(prompt);
         }
-        
+
         throw new Error(`Gemini API error: ${response.status} ${response.statusText} - ${errorText}`);
       }
 
@@ -161,7 +161,7 @@ export class GeminiInfluencerAgent {
    */
   private generateRateLimitedResponse(prompt: string): string {
     const currentTime = new Date().toLocaleString();
-    
+
     if (prompt.includes('trend brief')) {
       return `# ⚠️ Rate Limited - Trend Brief (Simulated)
 Generated at: ${currentTime}
@@ -207,7 +207,7 @@ Due to API rate limiting, this is a cached analysis. The Gemini AI service will 
         "executiveSummary": "🤖 Gemini AI Demo: Analysis shows strong engagement patterns across tech content with trending topics in AI, mobile technology, and product reviews.",
         "keyFindings": [
           "AI and machine learning discussions increased by 45%",
-          "Mobile technology reviews dominate with 60% content share", 
+          "Mobile technology reviews dominate with 60% content share",
           "Video content shows 3x higher engagement than static posts",
           "Collaboration content performs 35% better than solo content",
           "Short-form content growing at 25% month-over-month"
@@ -221,7 +221,7 @@ Due to API rate limiting, this is a cached analysis. The Gemini AI service will 
           },
           "instagram": {
             "summary": "Instagram performs well with visual product showcases",
-            "topContentTypes": ["Photos", "Reels", "Stories"], 
+            "topContentTypes": ["Photos", "Reels", "Stories"],
             "trendingHashtags": ["#TechLife", "#Innovation", "#Gadgets"],
             "engagementTrends": "Stories with polls achieve 65% higher engagement"
           }
@@ -251,7 +251,7 @@ Due to API rate limiting, this is a cached analysis. The Gemini AI service will 
         ]
       }`;
     }
-    
+
     return `🤖 Gemini AI Demo Response: Based on the influencer content analysis, I can see strong performance indicators across multiple platforms. Key insights include growing engagement with video content, trending discussions around AI and mobile technology, and opportunities for brand partnerships in the tech space.`;
   }
 
@@ -263,7 +263,7 @@ Due to API rate limiting, this is a cached analysis. The Gemini AI service will 
 
     this.processedData.forEach(influencer => {
       formattedContent += `\n=== ${influencer.influencerName.toUpperCase()} (${influencer.platform.toUpperCase()}) ===\n`;
-      
+
       influencer.content.forEach((post, index) => {
         formattedContent += `\nPost ${index + 1}:\n`;
         formattedContent += `- Type: ${post.type}\n`;
@@ -296,8 +296,8 @@ Due to API rate limiting, this is a cached analysis. The Gemini AI service will 
 
       // Generate comprehensive analysis
       const analysisPrompt = `
-        You are an expert social media analyst specializing in influencer marketing and trend analysis. 
-        
+        You are an expert social media analyst specializing in influencer marketing and trend analysis.
+
         Analyze the following influencer content data from the past ${timeframe} and provide a comprehensive trend brief.
 
         ${contentData}
@@ -317,7 +317,7 @@ Due to API rate limiting, this is a cached analysis. The Gemini AI service will 
               "engagementTrends": "Engagement pattern analysis"
             },
             "instagram": {
-              "summary": "Platform-specific insights", 
+              "summary": "Platform-specific insights",
               "topContentTypes": ["content types performing well"],
               "trendingHashtags": ["relevant hashtags"],
               "engagementTrends": "Engagement pattern analysis"
@@ -334,7 +334,7 @@ Due to API rate limiting, this is a cached analysis. The Gemini AI service will 
             },
             "sentimentAnalysis": {
               "positive": 0,
-              "neutral": 0, 
+              "neutral": 0,
               "negative": 0
             },
             "engagementInsights": [
@@ -369,13 +369,13 @@ Due to API rate limiting, this is a cached analysis. The Gemini AI service will 
       `;
 
       const analysisResponse = await this.generateContent(analysisPrompt);
-      
+
       // Check if this is a rate-limited response (markdown format)
       if (analysisResponse.includes('⚠️ Rate Limited') || analysisResponse.includes('# ⚠️')) {
         console.log('🚫 Rate limited response detected, creating enhanced fallback analysis...');
         return this.createRateLimitedTrendBrief(timeframe);
       }
-      
+
       // Parse the JSON response
       let parsedAnalysis;
       try {
@@ -436,7 +436,7 @@ Due to API rate limiting, this is a cached analysis. The Gemini AI service will 
    */
   private createRateLimitedTrendBrief(timeframe: string): TrendBrief {
     const currentTime = new Date().toLocaleString();
-    
+
     return {
       summary: `⚠️ Rate Limited Analysis - Generated at ${currentTime}. This analysis uses cached data due to API rate limiting. Real-time AI analysis will resume shortly with enhanced insights.`,
       period: timeframe,
@@ -569,7 +569,7 @@ Due to API rate limiting, this is a cached analysis. The Gemini AI service will 
     return {
       keyThemes: [
         'Technology Reviews',
-        'Product Comparisons', 
+        'Product Comparisons',
         'Innovation Discussions',
         'User Experience',
         'Industry Trends'
@@ -620,10 +620,10 @@ Due to API rate limiting, this is a cached analysis. The Gemini AI service will 
       influencer.content.forEach(post => {
         // Look for brand mentions in titles, captions, and hashtags
         const content = `${post.title || ''} ${post.caption || ''} ${post.hashtags?.join(' ') || ''}`.toLowerCase();
-        
+
         // Common tech brands to look for
         const techBrands = ['apple', 'samsung', 'google', 'microsoft', 'sony', 'lg', 'huawei', 'xiaomi', 'oneplus', 'nokia', 'dell', 'hp', 'asus', 'lenovo', 'acer'];
-        
+
         techBrands.forEach(brand => {
           if (content.includes(brand)) {
             if (!brandMentions[brand]) {
@@ -643,15 +643,15 @@ Due to API rate limiting, this is a cached analysis. The Gemini AI service will 
       if (data.count >= 2) { // Only include brands mentioned multiple times
         const avgEngagement = data.totalEngagement / data.count;
         const avgReach = data.totalReach / data.count;
-        
+
         // Determine collaboration type based on engagement and content patterns
         let type = 'Product Mention';
         if (avgEngagement > 500) type = 'Product Review';
         if (avgEngagement > 1000) type = 'Sponsorship';
-        
+
         // Calculate engagement rate
         const engagementRate = ((avgEngagement / avgReach) * 100).toFixed(1);
-        
+
         // Determine sentiment based on engagement patterns
         let sentiment = 'neutral';
         if (avgEngagement > 800) sentiment = 'positive';
@@ -699,7 +699,7 @@ Due to API rate limiting, this is a cached analysis. The Gemini AI service will 
 
     try {
       const contentData = this.formatContentForAnalysis();
-      
+
       const queryPrompt = `
         You are an expert social media analyst. Based on the following influencer content data, please answer this question: "${question}"
 
@@ -732,7 +732,7 @@ Due to API rate limiting, this is a cached analysis. The Gemini AI service will 
       for (const influencer of this.processedData) {
         for (const post of influencer.content) {
           const engagementRate = (post.engagement.likes + post.engagement.comments) / (post.engagement.views || 1000);
-          
+
           // Check for engagement spikes
           if (engagementRate > alertThresholds.engagementSpike) {
             alerts.push(`🚀 High engagement detected: ${influencer.influencerName} on ${influencer.platform} - ${post.engagement.likes} likes, ${post.engagement.comments} comments`);
@@ -750,10 +750,10 @@ Due to API rate limiting, this is a cached analysis. The Gemini AI service will 
         const sentimentPrompt = `
           Analyze the sentiment in this content data and identify any concerning negative trends or sentiment drops:
           ${this.formatContentForAnalysis()}
-          
+
           Respond with specific alerts if you detect significant negative sentiment patterns.
         `;
-        
+
         const sentimentResponse = await this.generateContent(sentimentPrompt);
         if (sentimentResponse.toLowerCase().includes('negative') || sentimentResponse.toLowerCase().includes('concern')) {
           alerts.push(`⚠️ Sentiment analysis: ${sentimentResponse}`);
