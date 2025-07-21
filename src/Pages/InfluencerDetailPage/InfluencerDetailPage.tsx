@@ -1182,16 +1182,6 @@ const InfluencerDetailPage: React.FC = () => {
               </div>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {/* Debug Info */}
-                {(selectedPlatform === 'instagram' || selectedPlatform === 'all') && (
-                  <div className="col-span-full text-sm text-gray-600 p-4 bg-blue-50 rounded mb-4">
-                    <strong>Debug Info:</strong> Instagram posts: {instagramPosts.length}, Instagram loading: {instagramLoading.toString()}, Selected platform: {selectedPlatform}
-                    {instagramPosts.length > 0 && (
-                      <div className="mt-2">First post type: {instagramPosts[0]?.type}, shortCode: {instagramPosts[0]?.shortCode}</div>
-                    )}
-                  </div>
-                )}
-                
                 {/* YouTube Videos */}
                 {(selectedPlatform === 'all' || selectedPlatform === 'youtube') && recentVideos.map((video) => (
                   <div key={`youtube-${video.id}`} className="bg-white rounded-lg shadow-sm border overflow-hidden hover:shadow-md transition-shadow cursor-pointer">
@@ -1304,7 +1294,11 @@ const InfluencerDetailPage: React.FC = () => {
 
                 {/* Instagram Posts */}
                 {(selectedPlatform === 'all' || selectedPlatform === 'instagram') && instagramPosts.map((post) => (
-                  <div key={`instagram-${post.shortCode}`} className="bg-white rounded-lg shadow-sm border overflow-hidden hover:shadow-md transition-shadow cursor-pointer">
+                  <div 
+                    key={`instagram-${post.shortCode}`} 
+                    className="bg-white rounded-lg shadow-sm border overflow-hidden hover:shadow-md transition-shadow cursor-pointer"
+                    onClick={() => window.open(post.url, '_blank', 'noopener,noreferrer')}
+                  >
                     <div className="relative">
                       <div className="w-full h-48 bg-gradient-to-br from-pink-400 to-purple-600 flex items-center justify-center text-white">
                         <div className="text-center">
