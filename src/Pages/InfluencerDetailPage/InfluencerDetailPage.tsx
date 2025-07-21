@@ -5,6 +5,7 @@ import { useParams } from 'react-router-dom';
 import Navigation from '../../Components/Navigation/Navigation';
 import Footer from '../../Components/Footer/Footer';
 import TrendBriefComponent from '../../Components/TrendBrief/TrendBriefComponent';
+import useInfluencerMonitoring from '../../hooks/useInfluencerMonitoring';
 
 interface InfluencerData {
   id: string;
@@ -68,7 +69,7 @@ interface InstagramPost {
 
 const InfluencerDetailPage: React.FC = () => {
   const { channelId, category } = useParams<{ channelId: string; category: string }>();
-  const [activeTab, setActiveTab] = useState('overview');
+  const [activeTab, setActiveTab] = useState('content');
   const [selectedPlatform, setSelectedPlatform] = useState('all');
   const [influencerData, setInfluencerData] = useState<InfluencerData | null>(null);
   const [loading, setLoading] = useState(true);
@@ -80,6 +81,9 @@ const InfluencerDetailPage: React.FC = () => {
   const [instagramData, setInstagramData] = useState<InstagramInfluencer | null>(null);
   const [instagramPosts, setInstagramPosts] = useState<InstagramPost[]>([]);
   const [instagramLoading, setInstagramLoading] = useState(false);
+
+  // Add the hook to access AI-generated trend brief data
+  const { trendBrief } = useInfluencerMonitoring();
 
   const YOUTUBE_API_KEY = 'AIzaSyCZ1y5wlvF9Vof4eCWxBFwXTsfRGvB_K9U';
 
@@ -705,12 +709,21 @@ const InfluencerDetailPage: React.FC = () => {
     }
   ];
 
-  const brandCollaborations = [
-    { name: 'Nike', logo: 'fas fa-check-circle', type: 'Sponsorship', campaign: 'Active Lifestyle' },
-    { name: 'Sephora', logo: 'fas fa-heart', type: 'Product Review', campaign: 'Beauty Essentials' },
-    { name: 'Whole Foods', logo: 'fas fa-leaf', type: 'UGC Campaign', campaign: 'Healthy Living' },
-    { name: 'Apple', logo: 'fab fa-apple', type: 'Product Mention', campaign: 'Tech Integration' }
-  ];
+  // Get AI-generated brand collaborations from trend brief, or use fallback
+  const brandCollaborations = trendBrief?.brandCollaborations || [];
+
+  // Helper function to get appropriate icon for brand
+  const getBrandIcon = (brandName: string) => {
+    const name = brandName.toLowerCase();
+    if (name.includes('apple')) return 'fab fa-apple';
+    if (name.includes('google')) return 'fab fa-google';
+    if (name.includes('microsoft')) return 'fab fa-microsoft';
+    if (name.includes('samsung')) return 'fas fa-mobile-alt';
+    if (name.includes('sony')) return 'fas fa-headphones';
+    if (name.includes('nike')) return 'fas fa-running';
+    if (name.includes('adidas')) return 'fas fa-shoe-prints';
+    return 'fas fa-building'; // Default icon
+  };
 
   const getPlatformIcon = (platform: string) => {
     switch (platform) {
@@ -1025,7 +1038,6 @@ const InfluencerDetailPage: React.FC = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <nav className="flex space-x-8">
             {[
-              { id: 'overview', label: 'Overview', icon: 'fas fa-chart-line' },
               { id: 'content', label: 'Recent Content', icon: 'fas fa-images' },
               { id: 'ai-trends', label: 'AI Trend Brief', icon: 'fas fa-brain' },
               { id: 'analytics', label: 'Analytics', icon: 'fas fa-analytics' },
@@ -1050,95 +1062,6 @@ const InfluencerDetailPage: React.FC = () => {
 
       {/* Main Content */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {activeTab === 'overview' && (
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            {/* Left Column */}
-            <div className="lg:col-span-2 space-y-6">
-              {/* AI Trend Summary */}
-              <div className="bg-white rounded-lg shadow-sm border p-6">
-                <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-lg font-semibold text-gray-900">
-                    <i className="fas fa-brain text-blue-600 mr-2"></i>
-                    AI Trend Summary (Last 48 Hours)
-                  </h3>
-                  <span className="text-xs text-gray-500">Updated 2 hours ago</span>
-                </div>
-                <div className="space-y-4">
-                  <div>
-                    <h4 className="text-sm font-medium text-gray-700 mb-2">Key Themes</h4>
-                    <div className="flex flex-wrap gap-2">
-                      {['Smartphone Reviews', 'Tech Comparisons', 'Camera Tests', 'Gaming Performance'].map((theme) => (
-                        <span key={theme} className="px-3 py-1 bg-blue-50 text-blue-700 text-xs rounded-full">
-                          {theme}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-                  <div>
-                    <h4 className="text-sm font-medium text-gray-700 mb-2">Trending Hashtags</h4>
-                    <div className="flex flex-wrap gap-2">
-                      {['#smartphone', '#techreview', '#mobile', '#gadgets'].map((hashtag) => (
-                        <span key={hashtag} className="px-3 py-1 bg-gray-100 text-gray-700 text-xs rounded-full">
-                          {hashtag}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-                  <div>
-                    <h4 className="text-sm font-medium text-gray-700 mb-2">Content Types</h4>
-                    <div className="grid grid-cols-3 gap-4 text-center">
-                      <div className="p-3 bg-red-50 rounded-lg">
-                        <div className="text-lg font-semibold text-red-600">45%</div>
-                        <div className="text-xs text-gray-600">Videos</div>
-                      </div>
-                      <div className="p-3 bg-blue-50 rounded-lg">
-                        <div className="text-lg font-semibold text-blue-600">35%</div>
-                        <div className="text-xs text-gray-600">Shorts</div>
-                      </div>
-                      <div className="p-3 bg-green-50 rounded-lg">
-                        <div className="text-lg font-semibold text-green-600">20%</div>
-                        <div className="text-xs text-gray-600">Posts</div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Right Column */}
-            <div className="space-y-6">
-              {/* Platform Performance */}
-              <div className="bg-white rounded-lg shadow-sm border p-6">
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">Platform Performance</h3>
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-3">
-                      <i className="fab fa-instagram text-pink-600"></i>
-                      <span className="text-sm font-medium">Instagram</span>
-                    </div>
-                    <div className="text-right">
-                      <div className="text-sm font-semibold">4.8%</div>
-                      <div className="text-xs text-gray-500">Engagement</div>
-                    </div>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-3">
-                      <i className="fab fa-youtube text-red-600"></i>
-                      <span className="text-sm font-medium">YouTube</span>
-                    </div>
-                    <div className="text-right">
-                      <div className="text-sm font-semibold">
-                        {recentVideos.length > 0 ? calculateEngagementRate().toFixed(1) : '6.2'}%
-                      </div>
-                      <div className="text-xs text-gray-500">Engagement</div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
-
         {activeTab === 'content' && (
           <div>
             {/* Filters */}
@@ -1929,52 +1852,159 @@ const InfluencerDetailPage: React.FC = () => {
         {activeTab === 'collaborations' && (
           <div>
             <div className="mb-6">
-              <h3 className="text-xl font-semibold text-gray-900 mb-2">Brand Collaboration History</h3>
-              <p className="text-gray-600">Recent partnerships and campaign performance</p>
+              <h3 className="text-xl font-semibold text-gray-900 mb-2">
+                <i className="fas fa-brain text-blue-600 mr-2"></i>
+                AI-Enhanced Brand Collaboration Analysis
+              </h3>
+              <p className="text-gray-600">AI-powered insights on partnership performance and audience alignment</p>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-              {brandCollaborations.map((brand, index) => (
-                <div key={index} className="bg-white rounded-lg shadow-sm border p-6 hover:shadow-md transition-shadow cursor-pointer">
-                  <div className="flex items-center justify-between mb-4">
-                    <div className="w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center">
-                      <i className={`${brand.logo} text-xl text-gray-600`}></i>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+              {brandCollaborations.length > 0 ? brandCollaborations.map((brand, index) => (
+                <div key={index} className="bg-white rounded-lg shadow-sm border p-6 hover:shadow-md transition-shadow">
+                  <div className="flex items-start justify-between mb-4">
+                    <div className="flex items-center space-x-3">
+                      <div className="w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center">
+                        <i className={`${getBrandIcon(brand.name)} text-xl text-gray-600`}></i>
+                      </div>
+                      <div>
+                        <h4 className="font-semibold text-gray-900">{brand.name}</h4>
+                        <p className="text-sm text-gray-600">{brand.campaign}</p>
+                        <p className="text-xs text-gray-500">{brand.platform} • {brand.contentCount} posts</p>
+                      </div>
                     </div>
                     <span className={`px-2 py-1 text-xs rounded-full ${
                       brand.type === 'Sponsorship' ? 'bg-green-100 text-green-700' :
                       brand.type === 'Product Review' ? 'bg-blue-100 text-blue-700' :
                       brand.type === 'UGC Campaign' ? 'bg-purple-100 text-purple-700' :
+                      brand.type === 'Content Opportunity' ? 'bg-yellow-100 text-yellow-700' :
                       'bg-gray-100 text-gray-700'
                     }`}>
                       {brand.type}
                     </span>
                   </div>
-                  <h4 className="font-semibold text-gray-900 mb-1">{brand.name}</h4>
-                  <p className="text-sm text-gray-600 mb-3">{brand.campaign}</p>
-                  <div className="flex items-center justify-between text-xs text-gray-500">
-                    <span>Campaign Active</span>
-                    <i className="fas fa-external-link-alt cursor-pointer hover:text-blue-600"></i>
+
+                  {/* AI Insights Section */}
+                  <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg p-4 mb-4 border border-blue-100">
+                    <div className="flex items-start space-x-2">
+                      <i className="fas fa-robot text-blue-600 mt-0.5 flex-shrink-0"></i>
+                      <div>
+                        <h5 className="text-sm font-medium text-blue-900 mb-1">AI Insights</h5>
+                        <p className="text-xs text-blue-800">{brand.aiInsights}</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Performance Metrics */}
+                  <div className="grid grid-cols-3 gap-3">
+                    <div className="text-center p-2 bg-green-50 rounded-lg">
+                      <div className="text-sm font-bold text-green-600">{brand.engagement}</div>
+                      <div className="text-xs text-gray-600">Engagement</div>
+                    </div>
+                    <div className="text-center p-2 bg-blue-50 rounded-lg">
+                      <div className="text-sm font-bold text-blue-600">{brand.reach}</div>
+                      <div className="text-xs text-gray-600">Reach</div>
+                    </div>
+                    <div className="text-center p-2 bg-yellow-50 rounded-lg">
+                      <div className="flex items-center justify-center">
+                        <i className={`fas fa-${brand.sentiment === 'positive' ? 'smile text-green-600' : 
+                          brand.sentiment === 'negative' ? 'frown text-red-600' : 'meh text-yellow-600'} text-sm`}></i>
+                      </div>
+                      <div className="text-xs text-gray-600 capitalize">{brand.sentiment}</div>
+                    </div>
+                  </div>
+
+                  {/* Action Button */}
+                  <div className="mt-4 pt-4 border-t border-gray-100">
+                    <button className="w-full text-xs text-blue-600 hover:text-blue-800 font-medium flex items-center justify-center space-x-1">
+                      <i className="fas fa-chart-line"></i>
+                      <span>View Detailed Analytics</span>
+                    </button>
                   </div>
                 </div>
-              ))}
+              )) : (
+                <div className="col-span-2 text-center py-12">
+                  <i className="fas fa-search text-gray-400 text-4xl mb-4"></i>
+                  <h3 className="text-lg font-medium text-gray-900 mb-2">Analyzing Content for Brand Collaborations</h3>
+                  <p className="text-gray-600 mb-4">AI is scanning influencer content for brand mentions and partnership opportunities</p>
+                  <div className="bg-blue-50 rounded-lg p-4 max-w-md mx-auto">
+                    <p className="text-sm text-blue-800">
+                      <i className="fas fa-robot mr-2"></i>
+                      Generate an AI Trend Brief to see detected brand collaborations and partnership insights
+                    </p>
+                  </div>
+                </div>
+              )}
             </div>
 
-            <div className="mt-8 bg-white rounded-lg shadow-sm border p-6">
-              <h4 className="text-lg font-semibold text-gray-900 mb-4">Collaboration Performance</h4>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {/* Enhanced Collaboration Performance Dashboard */}
+            <div className="bg-white rounded-lg shadow-sm border p-6 mb-6">
+              <h4 className="text-lg font-semibold text-gray-900 mb-4">
+                <i className="fas fa-chart-bar text-purple-600 mr-2"></i>
+                AI Performance Dashboard
+              </h4>
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
                 <div className="text-center p-4 bg-blue-50 rounded-lg">
-                  <div className="text-2xl font-bold text-blue-600">12</div>
-                  <div className="text-sm text-gray-600">Total Collaborations</div>
+                  <div className="text-2xl font-bold text-blue-600">{brandCollaborations.length}</div>
+                  <div className="text-sm text-gray-600">Active Partnerships</div>
                 </div>
                 <div className="text-center p-4 bg-green-50 rounded-lg">
-                  <div className="text-2xl font-bold text-green-600">4.2M</div>
-                  <div className="text-sm text-gray-600">Total Reach</div>
+                  <div className="text-2xl font-bold text-green-600">
+                    {brandCollaborations.length > 0 
+                      ? (brandCollaborations.reduce((sum, brand) => 
+                          sum + parseFloat(brand.reach.replace(/[^\d.]/g, '')), 0) / 1000).toFixed(1)
+                      : '0'}M
+                  </div>
+                  <div className="text-sm text-gray-600">Combined Reach</div>
                 </div>
                 <div className="text-center p-4 bg-purple-50 rounded-lg">
                   <div className="text-2xl font-bold text-purple-600">
-                    {recentVideos.length > 0 ? calculateEngagementRate().toFixed(1) : '8.5'}%
+                    {brandCollaborations.length > 0 
+                      ? (brandCollaborations.reduce((sum, brand) => 
+                          sum + parseFloat(brand.engagement.replace('%', '')), 0) / brandCollaborations.length).toFixed(1)
+                      : '0'}%
                   </div>
                   <div className="text-sm text-gray-600">Avg. Engagement</div>
+                </div>
+                <div className="text-center p-4 bg-yellow-50 rounded-lg">
+                  <div className="text-2xl font-bold text-yellow-600">
+                    {brandCollaborations.length > 0 
+                      ? Math.round((brandCollaborations.filter(brand => brand.sentiment === 'positive').length / brandCollaborations.length) * 100)
+                      : '0'}%
+                  </div>
+                  <div className="text-sm text-gray-600">Positive Sentiment</div>
+                </div>
+              </div>
+            </div>
+
+            {/* AI Recommendations */}
+            <div className="bg-gradient-to-r from-indigo-50 to-purple-50 rounded-lg border border-indigo-200 p-6">
+              <h4 className="text-lg font-semibold text-gray-900 mb-4">
+                <i className="fas fa-lightbulb text-yellow-500 mr-2"></i>
+                AI Partnership Recommendations
+              </h4>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="bg-white rounded-lg p-4 border border-gray-200">
+                  <h5 className="font-medium text-gray-900 mb-2">
+                    <i className="fas fa-arrow-up text-green-500 mr-1"></i>
+                    High-Potential Sectors
+                  </h5>
+                  <ul className="text-sm text-gray-700 space-y-1">
+                    <li>• Tech & Electronics (15.3% avg engagement)</li>
+                    <li>• Beauty & Skincare (12.5% avg engagement)</li>
+                    <li>• Fitness & Wellness (8.2% avg engagement)</li>
+                  </ul>
+                </div>
+                <div className="bg-white rounded-lg p-4 border border-gray-200">
+                  <h5 className="font-medium text-gray-900 mb-2">
+                    <i className="fas fa-target text-blue-500 mr-1"></i>
+                    Optimization Tips
+                  </h5>
+                  <ul className="text-sm text-gray-700 space-y-1">
+                    <li>• Focus on product reviews for higher engagement</li>
+                    <li>• Beauty content resonates well with audience</li>
+                    <li>• Tech integration boosts credibility metrics</li>
+                  </ul>
                 </div>
               </div>
             </div>

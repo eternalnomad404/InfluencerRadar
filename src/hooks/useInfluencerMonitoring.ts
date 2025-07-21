@@ -20,7 +20,20 @@ interface TrendBrief {
     recommendations: string[];
   };
   actionableRecommendations: string[];
+  brandCollaborations: BrandCollaboration[];
   generatedAt: Date;
+}
+
+interface BrandCollaboration {
+  name: string;
+  type: string;
+  campaign: string;
+  aiInsights: string;
+  engagement: string;
+  reach: string;
+  sentiment: string;
+  platform: string;
+  contentCount: number;
 }
 
 interface InfluencerMonitoringService {
@@ -226,6 +239,7 @@ class GeminiInfluencerMonitoringService implements InfluencerMonitoringService {
             "Explore collaborative content opportunities with complementary tech brands",
             "Develop sustainability messaging to align with emerging green tech trends"
           ],
+          brandCollaborations: [],
           generatedAt: new Date()
         });
       }, 1500);

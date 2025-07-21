@@ -19,7 +19,20 @@ interface TrendBrief {
   platformInsights: { [platform: string]: any };
   contentAnalysis: ContentAnalysisResult;
   actionableRecommendations: string[];
+  brandCollaborations: BrandCollaboration[];
   generatedAt: Date;
+}
+
+interface BrandCollaboration {
+  name: string;
+  type: string;
+  campaign: string;
+  aiInsights: string;
+  engagement: string;
+  reach: string;
+  sentiment: string;
+  platform: string;
+  contentCount: number;
 }
 
 interface InfluencerContent {
@@ -333,6 +346,19 @@ Due to API rate limiting, this is a cached analysis. The Gemini AI service will 
               "Market positioning insights"
             ]
           },
+          "brandCollaborations": [
+            {
+              "name": "Brand Name (extracted from content)",
+              "type": "Sponsorship|Product Review|UGC Campaign|Product Mention",
+              "campaign": "Campaign description inferred from content",
+              "aiInsights": "AI analysis of how this brand collaboration performed",
+              "engagement": "X.X%",
+              "reach": "XXXk",
+              "sentiment": "positive|neutral|negative",
+              "platform": "youtube|instagram|both",
+              "contentCount": 0
+            }
+          ],
           "actionableRecommendations": [
             "5-7 specific, actionable recommendations for brand teams",
             "Focus on content strategy, partnerships, competitive positioning"
@@ -392,6 +418,7 @@ Due to API rate limiting, this is a cached analysis. The Gemini AI service will 
           'Optimize content for mobile viewing',
           'Create shareable tech tips and tutorials'
         ],
+        brandCollaborations: parsedAnalysis.brandCollaborations || this.createDefaultBrandCollaborations(),
         generatedAt: new Date()
       };
 
@@ -471,6 +498,7 @@ Due to API rate limiting, this is a cached analysis. The Gemini AI service will 
         '🔄 Prepare for enhanced AI insights when available',
         '📊 Monitor engagement metrics during downtime'
       ],
+      brandCollaborations: this.createDefaultBrandCollaborations(),
       generatedAt: new Date()
     };
   }
@@ -503,6 +531,7 @@ Due to API rate limiting, this is a cached analysis. The Gemini AI service will 
         }
       },
       contentAnalysis: this.createDefaultContentAnalysis(),
+      brandCollaborations: this.createDefaultBrandCollaborations(),
       actionableRecommendations: [
         'Increase video content production',
         'Focus on trending tech topics',
@@ -577,6 +606,87 @@ Due to API rate limiting, this is a cached analysis. The Gemini AI service will 
         'Create content that encourages community discussion'
       ]
     };
+  }
+
+  /**
+   * Create default brand collaborations based on content analysis
+   */
+  private createDefaultBrandCollaborations(): BrandCollaboration[] {
+    const collaborations: BrandCollaboration[] = [];
+    const brandMentions: { [key: string]: { count: number; platforms: Set<string>; totalEngagement: number; totalReach: number } } = {};
+
+    // Analyze content for brand mentions and sponsored content indicators
+    this.processedData.forEach(influencer => {
+      influencer.content.forEach(post => {
+        // Look for brand mentions in titles, captions, and hashtags
+        const content = `${post.title || ''} ${post.caption || ''} ${post.hashtags?.join(' ') || ''}`.toLowerCase();
+        
+        // Common tech brands to look for
+        const techBrands = ['apple', 'samsung', 'google', 'microsoft', 'sony', 'lg', 'huawei', 'xiaomi', 'oneplus', 'nokia', 'dell', 'hp', 'asus', 'lenovo', 'acer'];
+        
+        techBrands.forEach(brand => {
+          if (content.includes(brand)) {
+            if (!brandMentions[brand]) {
+              brandMentions[brand] = { count: 0, platforms: new Set(), totalEngagement: 0, totalReach: 0 };
+            }
+            brandMentions[brand].count++;
+            brandMentions[brand].platforms.add(influencer.platform);
+            brandMentions[brand].totalEngagement += post.engagement.likes + post.engagement.comments;
+            brandMentions[brand].totalReach += post.engagement.views || 1000;
+          }
+        });
+      });
+    });
+
+    // Convert mentions to collaboration objects
+    Object.entries(brandMentions).forEach(([brandName, data]) => {
+      if (data.count >= 2) { // Only include brands mentioned multiple times
+        const avgEngagement = data.totalEngagement / data.count;
+        const avgReach = data.totalReach / data.count;
+        
+        // Determine collaboration type based on engagement and content patterns
+        let type = 'Product Mention';
+        if (avgEngagement > 500) type = 'Product Review';
+        if (avgEngagement > 1000) type = 'Sponsorship';
+        
+        // Calculate engagement rate
+        const engagementRate = ((avgEngagement / avgReach) * 100).toFixed(1);
+        
+        // Determine sentiment based on engagement patterns
+        let sentiment = 'neutral';
+        if (avgEngagement > 800) sentiment = 'positive';
+        else if (avgEngagement < 200) sentiment = 'negative';
+
+        collaborations.push({
+          name: brandName.charAt(0).toUpperCase() + brandName.slice(1),
+          type: type,
+          campaign: `${brandName} product features and reviews`,
+          aiInsights: `Mentioned ${data.count} times across content. ${avgEngagement > 500 ? 'High engagement suggests positive audience reception.' : 'Moderate engagement indicates brand awareness opportunity.'}`,
+          engagement: `${engagementRate}%`,
+          reach: `${(avgReach / 1000).toFixed(0)}k`,
+          sentiment: sentiment,
+          platform: Array.from(data.platforms).join(', '),
+          contentCount: data.count
+        });
+      }
+    });
+
+    // If no brand collaborations detected, provide default examples based on content themes
+    if (collaborations.length === 0) {
+      collaborations.push({
+        name: 'Tech Brand',
+        type: 'Content Opportunity',
+        campaign: 'No current brand collaborations detected',
+        aiInsights: 'AI analysis shows potential for tech brand partnerships based on content themes and audience engagement patterns.',
+        engagement: '0.0%',
+        reach: '0k',
+        sentiment: 'neutral',
+        platform: 'youtube, instagram',
+        contentCount: 0
+      });
+    }
+
+    return collaborations.slice(0, 6); // Return top 6 collaborations
   }
 
   /**
